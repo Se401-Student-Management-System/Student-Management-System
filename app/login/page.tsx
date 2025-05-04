@@ -35,31 +35,7 @@ export default function PageLogin() {
     },
   });
 
-  const onSubmit = async (data: any) => {
-    setIsLoading(true); // Khi submit thì bật loading
-    const res = await fetch("/api/login", {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
-
-    if (res.ok) {
-      const { role } = await res.json();
-      toast.success("Đăng nhập thành công");
-
-      setTimeout(() => {
-        if (role === 1) {
-          router.push("/admin/statics");
-        } else if (role === 2) {
-          router.push("/client/collection/dashboard");
-        }
-      }, 100);
-    } else {
-      setIsLoading(false); // Tắt loading nếu lỗi
-      toast.error("Đăng nhập thất bại", {
-        className: "bg-red-500 text-white shadow-md",
-      });
-    }
-  };
+  const onSubmit = async (data: any) => {};
 
   return (
     <div className="w-full h-full bg-white inline-flex flex-col justify-start items-start overflow-hidden">
