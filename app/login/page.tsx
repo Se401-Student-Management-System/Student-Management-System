@@ -40,25 +40,21 @@ export default function PageLogin() {
   return (
     <div className="w-full h-full bg-white inline-flex flex-col justify-start items-start overflow-hidden">
       {/* Heading */}
-      <div className="h-[80px] px-[30px] py-2.5 bg-white inline-flex justify-start items-center gap-5 overflow-hidden">
-        <img
-          className="w-[173.68px] h-[60px] relative"
-          src="/logo_left.png"
-          alt="logo"
-        />
+      <div className="h-[70px] px-[30px] py-2.5 bg-white inline-flex justify-start items-center gap-5 overflow-hidden">
+        <img className="h-[60px] relative" src="/logo.png" alt="logo" />
         <div className="relative justify-start text-[#01B3EF] text-[28px] font-bold font-['Inter']">
           ĐĂNG NHẬP
         </div>
       </div>
 
       {/* Body */}
-      <div className="w-full h-full bg-primary inline-flex justify-start items-start overflow-hidden">
+      <div className="w-full h-full bg-[#01B3EF] inline-flex justify-start items-start overflow-hidden">
         {/* Left */}
         <div className="w-1/2 h-full inline-flex justify-between items-center overflow-hidden">
           <img
-            className="h-full relative"
-            src="/logo_slogan.png"
-            alt="logo_slogan"
+            className="w-[75%] h-[80%] ml-[80px]"
+            src="/image.png"
+            alt="image"
           />
         </div>
 
@@ -113,7 +109,7 @@ export default function PageLogin() {
                 <Button
                   type="submit"
                   disabled={isLoading} // Disable khi loading
-                  className="w-[500px] h-[40px] p-2.5 bg-secondary rounded-[5px] inline-flex justify-center items-center gap-2.5 overflow-hidden"
+                  className="w-[500px] h-[40px] p-2.5 bg-secondary rounded-[5px] inline-flex justify-center items-center gap-2.5 overflow-hidden mb-[20px]"
                 >
                   <div className="relative justify-start text-white text-[20px] font-bold font-['Inter']">
                     {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
@@ -121,24 +117,6 @@ export default function PageLogin() {
                 </Button>
               </form>
             </Form>
-
-            <div className="w-full flex flex-col items-center gap-2">
-              <Link
-                href="/forgetpw"
-                className="text-[16px] text-[#01B3EF] hover:underline"
-              >
-                Quên mật khẩu?
-              </Link>
-              <div className="text-[16px] text-gray-600 mt-[15px]">
-                Chưa có tài khoản?{" "}
-                <Link
-                  href="/register"
-                  className="text-[#01B3EF] font-bold text-[16px] hover:underline"
-                >
-                  Đăng ký
-                </Link>
-              </div>
-            </div>
           </div>
         </div>
       </div>
