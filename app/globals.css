@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+  font-family: Inter;
+}
+
+@layer base {
+  :root {
+    /* Màu nền */
+    --background: 0 0 196%;
+
+    /* Màu chữ */
+    --foreground: 222.2 84% 4.9%;
+
+    /* Màu chính và phụ */
+    --primary: 0 0 100%; /* Trắng  */
+    --secondary: 195 99% 47%; /* Xanh dương (#01B3EF)  */
+
+    /* Màu phụ trợ */
+    --muted: 340 73% 57%; /* Hồng (#E14177) */
+    --accent: 199 95% 71%; /* Xanh da trời (#6DCFFB) */
+    --light: 210, 20%, 98%; /* Xám nhạt (#F9FAFB) */
+
+    /* Màu viền và input */
+    --border: 199 95% 71%;
+    --input: 199 95% 71%;
+    --ring: 208 98% 24%; /* Xanh dương đậm (#01427A) */
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 0 0% 0%; /* Đen */
+    --foreground: 249 61% 98%; /* Xám nhạt (#F9FAFB) */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
