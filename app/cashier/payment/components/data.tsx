@@ -1,13 +1,10 @@
 export const mockPayment = [
     {
         id: 1,
-        student_id: 1,
+        invoice_id: 1,
+        cashier_id: 1,
         name: "Nguyễn Văn A",
-        class: "11A1",
-        year: "2024-2025",
-        totalFee: "1000000",
-        totalPayment: "1000000",
-        debtAmount: "0",
-        status: "Hoàn tất"
+        money: "1000000",
+        payment_date: "10-4-2025"
     },
 ]

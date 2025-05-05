@@ -1,23 +1,17 @@
 "use client";
 
 import React from "react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
-import Link from "next/link";
-import { Pencil } from "lucide-react";
+import { Trash2 } from "lucide-react";
 
 export interface Payment {
-    id: number;
-    student_id: number;
-    name: string;
-    class: string;
-    year: string;
-    totalFee: string;
-    totalPayment: string;
-    debtAmount: string;
-    status: string;
-    
+  id: number;
+  invoice_id: number;
+  cashier_id: number;
+  name: string;
+  money: string;
+  payment_date: string;
 }
 
 export const columns: ColumnDef<Payment>[] = [
@@ -37,7 +31,7 @@ export const columns: ColumnDef<Payment>[] = [
       cell: ({ row }) => <div>{row.getValue("id")}</div>,
     },
     {
-        accessorKey: "student_id",
+        accessorKey: "invoice_id",
         header: ({ column }) => {
           return (
             <Button
@@ -45,11 +39,26 @@ export const columns: ColumnDef<Payment>[] = [
               variant="ghost"
               style={{ backgroundColor: "transparent" }}
             >
-              Mã học sinh
+              Mã hóa đơn
             </Button>
           );
         },
-        cell: ({ row }) => <div>{row.getValue("student_id")}</div>,
+        cell: ({ row }) => <div>{row.getValue("invoice_id")}</div>,
+      },
+      {
+        accessorKey: "cashier_id",
+        header: ({ column }) => {
+          return (
+            <Button
+              className="pl-0"
+              variant="ghost"
+              style={{ backgroundColor: "transparent" }}
+            >
+              Mã thu ngân
+            </Button>
+          );
+        },
+        cell: ({ row }) => <div>{row.getValue("cashier_id")}</div>,
       },
       {
         accessorKey: "name",
@@ -67,52 +76,7 @@ export const columns: ColumnDef<Payment>[] = [
         cell: ({ row }) => <div>{row.getValue("name")}</div>,
       },
       {
-        accessorKey: "class",
-        header: ({ column }) => {
-          return (
-            <Button
-              className="pl-0"
-              variant="ghost"
-              style={{ backgroundColor: "transparent" }}
-            >
-              Lớp
-            </Button>
-          );
-        },
-        cell: ({ row }) => <div>{row.getValue("class")}</div>,
-      },
-      {
-        accessorKey: "year",
-        header: ({ column }) => {
-          return (
-            <Button
-              className="pl-0"
-              variant="ghost"
-              style={{ backgroundColor: "transparent" }}
-            >
-              Năm học
-            </Button>
-          );
-        },
-        cell: ({ row }) => <div>{row.getValue("year")}</div>,
-      },
-      {
-        accessorKey: "totalFee",
-        header: ({ column }) => {
-          return (
-            <Button
-              className="pl-0"
-              variant="ghost"
-              style={{ backgroundColor: "transparent" }}
-            >
-              Tổng học phí
-            </Button>
-          );
-        },
-        cell: ({ row }) => <div>{row.getValue("totalFee")}</div>,
-      },
-      {
-        accessorKey: "totalPayment",
+        accessorKey: "money",
         header: ({ column }) => {
           return (
             <Button
@@ -124,10 +88,10 @@ export const columns: ColumnDef<Payment>[] = [
             </Button>
           );
         },
-        cell: ({ row }) => <div>{row.getValue("totalPayment")}</div>,
+        cell: ({ row }) => <div>{row.getValue("money")}</div>,
       },
       {
-        accessorKey: "debtAmount",
+        accessorKey: "payment_date",
         header: ({ column }) => {
           return (
             <Button
@@ -135,72 +99,19 @@ export const columns: ColumnDef<Payment>[] = [
               variant="ghost"
               style={{ backgroundColor: "transparent" }}
             >
-              Còn nợ
+              Ngày thanh toán
             </Button>
           );
         },
-        cell: ({ row }) => <div>{row.getValue("debtAmount")}</div>,
-      },
+        cell: ({ row }) => <div>{row.getValue("payment_date")}</div>,
+      }, 
       {
-        accessorKey: "status",
-        header: ({ column }) => {
-          return (
-            <Button
-              className="pl-0"
-              variant="ghost"
-              style={{ backgroundColor: "transparent" }}
-            >
-              Trạng thái
-            </Button>
-          );
-        },
-        cell: ({ row }) => {
-          const rawStatus = row.getValue("status") as string;
-          const status = rawStatus.toLowerCase(); // chuyển về lowercase
-    
-          const statusLabel =
-            {
-              pending: "Đang chờ",
-              processing: "Đang xử lý",
-              shipping: "Đang giao",
-              completed: "Hoàn tất",
-              request: "Yêu cầu",
-              return: "Trả hàng",
-              cancelled: "Đã huỷ",
-            }[status] ?? rawStatus;
-    
-          return (
-            <Badge
-              variant={
-                status as
-                  | "default"
-                  | "destructive"
-                  | "outline"
-                  | "secondary"
-                  | "completed"
-                  | "processing"
-                  | "pending"
-                  | "cancelled"
-                  | "return"
-                  | "request"
-                  | "shipping"
-              }
-            >
-              {statusLabel}
-            </Badge>
-          );
-        },
+        id: "action",
+        header: "Action",
+        cell: ({ row }) => (
+          <div className="self-stretch self-stretch inline-flex justify-center items-center gap-2.5">
+            <Trash2 color="#E14177" />
+          </div>
+        ),
       },
-    
-      // {
-      //   id: "action",
-      //   header: "Action",
-      //   cell: ({ row }) => (
-      //     <div className="self-stretch self-stretch inline-flex justify-center items-center gap-2.5">
-      //       <Link href={`/admin/order/cancelled/detail/${row.getValue("id")}`}>
-      //         <Pencil color="#5cb338" />
-      //       </Link>
-      //     </div>
-      //   ),
-      // },
 ]

@@ -79,7 +79,15 @@ export default function CashierLayout ({ children }: CashierLayoutProps) {
                                 href="/cashier/payment"
                                 className="block w-full py-2 px-2 text-black hover:bg-gray-200"
                                 >
-                                Danh sách
+                                Lịch sử thanh toán
+                                </Link>
+                            </AccordionContent>{" "}
+                            <AccordionContent className="w-full">
+                                <Link
+                                href="/cashier/invoice"
+                                className="block w-full py-2 px-2 text-black hover:bg-gray-200"
+                                >
+                                Danh sách hóa đơn
                                 </Link>
                             </AccordionContent>{" "}
                         </AccordionItem>

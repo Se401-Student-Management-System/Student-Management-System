@@ -2,23 +2,23 @@
 
 import React, {useEffect, useState} from "react";
 import { DataTable } from "./components/data-table";
-import { columns, Payment } from "./components/column";
-import { mockPayment } from "./components/data";
+import { columns, Invoice } from "./components/column";
+import { mockInvoice } from "./components/data";
 
-export default function PagePaymentList() {
-  const [data, setData] = useState<Payment[]>([]);
+export default function PageInvoiceList() {
+  const [data, setData] = useState<Invoice[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     setTimeout(() => {
-      setData(mockPayment);
+      setData(mockInvoice);
       setIsLoading(false);
     }, 500);
   }, []);
 
   return (
     <div className="relative justify-start text-black text-base font-normal font-['Inter']">
-      Học phí / Quản lý học phí / Lịch sử thanh toán
+      Học phí / Quản lý học phí / Danh sách hóa đơn
       <DataTable
         columns={columns} 
         data={data} 
