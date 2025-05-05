@@ -18,11 +18,11 @@ body {
     --foreground: 222.2 84% 4.9%;
 
     /* Màu chính và phụ */
-    --primary: 199 95 71%; /*Xanh da trời (#6DCFFB)  */
+    --primary: 195 99% 47%; /*Xanh da trời (#6DCFFB)  */
     --secondary: 340 73% 57%; /* Hồng (#E14177)  */
 
     /* Màu phụ trợ */
-    --muted: 195 99% 47%; /* Xanh da trời đậm (#01B3EF) */
+    --muted: 199 95 71%; /* Xanh da trời đậm (#01B3EF) 199 95 71%; */
     --accent: 208 98% 24%; /* Xanh dương đậm (#01427A) */
     --light: 210, 20%, 98%; /* Xám nhạt (#F9FAFB) */
 
