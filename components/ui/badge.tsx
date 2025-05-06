@@ -11,11 +11,12 @@ const badgeVariants = cva(
         default:
           "border-transparent bg-primary text-white shadow hover:bg-primary/80",
         secondary:
-          "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
+          "border-transparent bg-secondary text-white hover:bg-secondary/80",
         destructive:
           "border-transparent bg-destructive text-destructive-foreground shadow hover:bg-destructive/80",
         outline: "text-foreground",
         completed: "bg-[#5CB338] border-none text-white",
+        inactive: "bg-gray-400 border-none text-white",
         processing: "bg-[#ECE852] border-none text-black",
         pending: "bg-[#FFC145] border-none text-black",
         cancelled: "bg-[#FB4141] border-none text-white",
@@ -39,12 +40,16 @@ function Badge({
   variant,
   status,
   ...props
-}: BadgeProps & { status?: "active" | "inactive" }) {
+}: BadgeProps & {
+  status?: "active" | "onHold" | "inactive" | "pending" | "paid";
+}) {
   const computedVariant =
-    status === "active"
-      ? "default"
+    status === "active" || status === "pending"
+      ? "default" // Đang học hoặc chờ xử lý
+      : status === "onHold" || status === "paid"
+      ? "secondary" // Đang bảo lưu hoặc đã thanh toán
       : status === "inactive"
-      ? "secondary"
+      ? "inactive" // Hết hạn bảo lưu
       : variant;
 
   return (
