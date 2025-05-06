@@ -154,43 +154,19 @@ export const columns: ColumnDef<Invoice>[] = [
           );
         },
         cell: ({ row }) => {
-          const rawStatus = row.getValue("status") as string;
-          const status = rawStatus.toLowerCase(); // chuyển về lowercase
-    
-          const statusLabel =
-            {
-              pending: "Đang chờ",
-              processing: "Đang xử lý",
-              shipping: "Đang giao",
-              completed: "Hoàn tất",
-              request: "Yêu cầu",
-              return: "Trả hàng",
-              cancelled: "Đã huỷ",
-            }[status] ?? rawStatus;
-    
-          return (
-            <Badge
-              variant={
-                status as
-                  | "default"
-                  | "destructive"
-                  | "outline"
-                  | "secondary"
-                  | "completed"
-                  | "processing"
-                  | "pending"
-                  | "cancelled"
-                  | "return"
-                  | "request"
-                  | "shipping"
-              }
-            >
-              {statusLabel}
-            </Badge>
-          );
-        },
-      },
-    
+              const status = row.getValue("status");
+        
+              return (
+                <Badge status={status as "inactive" | "active" | "onHold" | undefined}>
+                  {status === "active"
+                    ? "Đã thanh toán"
+                    : status === "onHold"
+                    ? "Thanh toán 1 phần"
+                    : "Chưa thanh toán"}
+                </Badge>
+              );
+            },
+      },   
       {
         id: "action",
         header: "Action",

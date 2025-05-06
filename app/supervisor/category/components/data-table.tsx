@@ -22,11 +22,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { CirclePlus, PlusCircle, Search } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { DataTablePagination } from "./data-pagination";
 import { TableFilter } from "./table-filter";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/ui/select";
+import Link from "next/link";
 
 interface DataTableProps<TData extends object, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -78,33 +79,20 @@ export function DataTable<TData extends object, TValue>({
   return (
     <div>
       <div className="w-full bg-white flex items-center justify-between border border-white rounded-[10px] mb-[20px] mt-[10px] h-[60px]">
-        <div className="flex justify-end items-center h-full gap-2">
+        <div className="flex justify-end items-center h-full">
           <div className="relative h-full flex items-center">
             <TableFilter table={table} />
             <Search className="absolute right-2 top-1/3 transform -translate-y-1 text-black" />
           </div>
-          <Select>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Trạng thái" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="paid">Đã thanh toán</SelectItem>
-              <SelectItem value="inpaid">Chưa thanh toán</SelectItem>
-              <SelectItem value="processing">Thanh toán 1 phần</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Năm học" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="2022-2023">2022-2023</SelectItem>
-              <SelectItem value="2023-2024">2023-2024</SelectItem>
-              <SelectItem value="2024-2025">2024-2025</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
-        
+        <div className="flex justify-start">
+          <div className="relative">
+            <PlusCircle className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white" />
+            <Button className="pl-12 h-[40px]">
+              <Link href="/supervisor/category/add">Thêm loại vi phạm</Link>
+            </Button>{" "}
+          </div>
+        </div>
       </div>
       <div className="rounded-md">
         {isLoading ? (

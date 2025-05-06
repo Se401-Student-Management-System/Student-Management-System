@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
 import { Toaster } from "@/components/ui/sonner";
-import { ChevronDown, Ticket } from "lucide-react";
+import { ChevronDown, NotebookPen } from "lucide-react";
 
 interface CashierLayoutProps {
   children: ReactNode;
@@ -40,7 +40,7 @@ export default function CashierLayout ({ children }: CashierLayoutProps) {
                     <img className="grow shrink basis-0 self-stretch" src="/ava.png" />
                     <div className="flex flex-col">
                         <span className="w-[100px] whitespace-nowrap">Nguyễn Văn A</span>
-                        <span>Thu ngân</span>
+                        <span>Giám thị</span>
                     </div>
                     {/* <div className="w-[100px] text-center text-black text-[16px] font-normal font-['Inter'] whitespace-nowrap flex items-center justify-center">
                     {userName || "Đang tải..."}
@@ -65,32 +65,32 @@ export default function CashierLayout ({ children }: CashierLayoutProps) {
                     <Accordion type="multiple" className="w-full">
                         <div className="h-[30px] justify-start items-center gap-5 inline-flex">
                             <div className="grow shrink basis-0 text-[#afafaf] text-base font-normal font-['Inter']">
-                                Học phí
+                                Hạnh kiểm
                             </div>
                         </div>
                         <AccordionItem value="thongke" className="w-full">
                             <div className="w-full h-[30px] justify-between items-center inline-flex">
                                 <AccordionTrigger>
                                     <div data-svg-wrapper className="relative">
-                                        <Ticket color="#01B3EF" />
+                                        <NotebookPen color="#E14177" />
                                     </div>
-                                    Quản lý học phí
+                                    Quản lý hạnh kiểm
                                 </AccordionTrigger>
                             </div>
                             <AccordionContent className="w-full">
                                 <Link
-                                href="/cashier/payment"
+                                href="/supervisor/fault"
                                 className="block w-full py-2 px-2 text-black hover:bg-gray-200"
                                 >
-                                Lịch sử thanh toán
+                                Thông tin vi phạm
                                 </Link>
                             </AccordionContent>{" "}
                             <AccordionContent className="w-full">
                                 <Link
-                                href="/cashier/invoice"
+                                href="/supervisor/category"
                                 className="block w-full py-2 px-2 text-black hover:bg-gray-200"
                                 >
-                                Danh sách hóa đơn
+                                Danh mục vi phạm
                                 </Link>
                             </AccordionContent>{" "}
                         </AccordionItem>

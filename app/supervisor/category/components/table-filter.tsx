@@ -12,7 +12,7 @@ export function TableFilter<TData>({ table }: TableFilterProps<TData>) {
   return (
     <div>
       <Input
-        placeholder="Tìm theo ID, họ tên, ngày thanh toán,..."
+        placeholder="Tìm theo ID, tên vi phạm, điểm trừ"
         className="w-[300px]"
         onChange={(e) => table.setGlobalFilter(e.target.value)}
       />
