@@ -85,6 +85,15 @@ export function DataTable<TData extends object, TValue>({
             <Search className="absolute right-2 top-1/3 transform -translate-y-1 text-gray-500" />
           </div>
         </div>
+
+        <div className="flex justify-start">
+          <div className="relative">
+            <PlusCircle className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white" />
+            <Button className="pl-12 h-[40px]">
+              <Link href="/director/class/add">Thêm lớp học</Link>
+            </Button>{" "}
+          </div>
+        </div>
       </div>
       <div className="rounded-md">
         {isLoading ? (

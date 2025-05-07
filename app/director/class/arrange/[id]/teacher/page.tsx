@@ -2,17 +2,16 @@
 import React, { useState } from "react";
 import { DataTable } from "./components/data-table";
 import { columns } from "./components/columns";
-import { classData } from "./data/class-data";
-
+import { TeacherArrangeData } from "./data/teacher-data";
 export default function page() {
   const [error, setError] = useState<string | undefined>(undefined);
 
   return (
     <div className="relative justify-start text-black text-base font-normal font-['Inter']">
-      Trung tâm / Quy định / Danh hiệu
+      Học tập / Lớp học / Xếp lớp / 11A1
       <DataTable
         columns={columns}
-        data={classData}
+        data={TeacherArrangeData}
         isLoading={false}
         error={error}
       />
