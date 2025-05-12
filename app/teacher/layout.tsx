@@ -109,7 +109,7 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
                   <div data-svg-wrapper className="relative">
                     <ChartColumnBig color="#01B3EF" />
                   </div>
-                  Học lực
+                  Thống kê
                 </AccordionTrigger>
               </div>
               <AccordionContent className="w-full">
@@ -117,7 +117,7 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
                   href="/teacher/statics/grade"
                   className="block w-full py-2 px-2 text-black hover:bg-gray-200"
                 >
-                  Thống kê học lực
+                  Học lực
                 </Link>
               </AccordionContent>
             </AccordionItem>
@@ -180,7 +180,7 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
               </AccordionContent>
               <AccordionContent className="w-full">
                 <Link
-                  href="/teacher/class/record"
+                  href="/teacher/class/record/list"
                   className="block w-full py-2 px-2 text-black hover:bg-gray-200"
                 >
                   Báo cáo học lực lớp
