@@ -87,7 +87,7 @@ export default function AddInvoice() {
   // }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const res = await fetch("/api/payment", {
+    const res = await fetch("/api/invoice", {
       method: "POST",
       body: JSON.stringify(values),
       headers: { "Content-Type": "application/json" },
@@ -126,7 +126,7 @@ export default function AddInvoice() {
           encType="multipart/form-data"
         >
           {/* Thông tin học sinh */}
-           <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 gap-6">
             <div>
               <FormItem className="w-full flex flex-col">
                 <FormLabel className="font-normal">Mã học sinh</FormLabel>

@@ -1,0 +1,42 @@
+export const mockFault = [
+    {
+        id: 1,
+        student_id: 1,
+        name: "Trần Thanh Bình",
+        class: "11A1",
+        fault: "Đi trễ",
+        minus_point: "3",
+    },
+    {
+        id: 2,
+        student_id: 2,
+        name: "Lê Thanh Hà",
+        class: "11A2",
+        fault: "Không mặc đồng phục",
+        minus_point: "5",
+    },
+    {
+        id: 3,
+        student_id: 1,
+        name: "Trần Thanh Bình",
+        class: "11A1",
+        fault: "Gây mất trật tự trong lớp",
+        minus_point: "2",
+    },
+    {
+        id: 4,
+        student_id: 3,
+        name: "Nguyễn Phước Tiến",
+        class: "11A3",
+        fault: "Đi trễ",
+        minus_point: "3",
+    },
+    {
+        id: 5,
+        student_id: 1,
+        name: "Trần Thanh Bình",
+        class: "11A1",
+        fault: "Nghỉ học không phép",
+        minus_point: "5",
+    },
+]

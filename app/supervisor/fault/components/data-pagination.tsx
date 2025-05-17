@@ -118,7 +118,7 @@ export function DataTablePagination<TData>({
 
       {/* Thông tin phân trang và số bản ghi */}
       <div className="flex items-center space-x-2">
-        <p className="text-[16px]">Total: {totalRecords} categories</p>
+        <p className="text-[16px]">Total: {totalRecords} faults</p>
       </div>
     </div>
   );

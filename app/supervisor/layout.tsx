@@ -28,12 +28,15 @@ export default function CashierLayout ({ children }: CashierLayoutProps) {
     const [isLoading, setIsLoading] = useState(false);
     const [userName, setUserName] = useState<string>("");
     const router = useRouter();
+    const handleLogout = async () => {};
     return (
         <div className="h-full w-full bg-white flex-col justify-start items-start inline-flex overflow-hidden">
             {/* Heading */}
             <div className="w-full h-14 px-[30px] py-2.5 bg-white border-b border-black/20 justify-between items-center inline-flex overflow-hidden">
                 {/* Left */}
-                <div className="h-[60px] justify-start items-center gap-5 inline-flex"></div>
+                <div className="h-[60px] justify-start items-center gap-5 inline-flex">
+                    <img className=" h-[90%] p-2" src="/logo_sg.png" alt="logo" />
+                </div>
                 {/* Right */}
                 <div className="h-[40px] justify-start items-center gap-[30px] inline-flex">
                 <div className="w-[130px] self-stretch justify-start items-center gap-2.5 flex">
@@ -51,9 +54,17 @@ export default function CashierLayout ({ children }: CashierLayoutProps) {
                         <ChevronDown />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
-                    <DropdownMenuItem onClick={() => router.push("/cashier/profile")}>
-                        Profile
-                    </DropdownMenuItem>{" "}
+                        <DropdownMenuItem
+                            onClick={() => router.push("/cashier/password")}
+                        >
+                            Đổi mật khẩu
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => router.push("/cashier/profile")}>
+                            Profile
+                        </DropdownMenuItem>{" "}
+                        <DropdownMenuItem onClick={handleLogout} disabled={isLoading}>
+                            Đăng xuất
+                        </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
                 </div>
@@ -68,7 +79,7 @@ export default function CashierLayout ({ children }: CashierLayoutProps) {
                                 Hạnh kiểm
                             </div>
                         </div>
-                        <AccordionItem value="thongke" className="w-full">
+                        <AccordionItem value="hanhkiem" className="w-full">
                             <div className="w-full h-[30px] justify-between items-center inline-flex">
                                 <AccordionTrigger>
                                     <div data-svg-wrapper className="relative">
@@ -96,14 +107,14 @@ export default function CashierLayout ({ children }: CashierLayoutProps) {
                         </AccordionItem>
                     </Accordion>
                 </div>
-                    <main className="flex-1 p-6 bg-white h-full overflow-y-auto">
-                {children}
-                <Toaster
-                    position="top-right"
-                    richColors
-                    duration={5000}
-                    closeButton
-                />
+                <main className="flex-1 p-6 bg-white h-full overflow-y-auto">
+                    {children}
+                    <Toaster
+                        position="top-right"
+                        richColors
+                        duration={5000}
+                        closeButton
+                    />
                 </main>
             </div>
         </div>

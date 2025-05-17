@@ -37,7 +37,7 @@ const formSchema = z.object({
     }),
 })
 
-export default function AddInvoice() {
+export default function AddCategory() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   
@@ -80,7 +80,7 @@ export default function AddInvoice() {
         </Breadcrumb>
       </div>
       <div className="relative justify-start text-[#6DCFFB] text-base font-bold font-['Inter'] mt-[10px]">
-        Thông tin vi phạm
+        Thông tin loại vi phạm
       </div>
       <Form {...form}>
         <form

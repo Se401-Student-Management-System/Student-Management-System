@@ -22,10 +22,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { CirclePlus, PlusCircle, Search } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { DataTablePagination } from "./data-pagination";
 import { TableFilter } from "./table-filter";
+import Link from "next/link";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/ui/select";
 
 interface DataTableProps<TData extends object, TValue> {
@@ -66,12 +68,12 @@ export function DataTable<TData extends object, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    filterFns: { global: globalFilterFn }, // Dùng bộ lọc toàn cục
-    onGlobalFilterChange: setGlobalFilter, // Cập nhật giá trị tìm kiếm
+    filterFns: { global: globalFilterFn }, 
+    onGlobalFilterChange: setGlobalFilter, 
     state: {
       sorting,
       columnFilters,
-      globalFilter, // Thêm state này vào bảng
+      globalFilter, 
     },
   });
 
@@ -85,12 +87,12 @@ export function DataTable<TData extends object, TValue>({
           </div>
           <Select>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Trạng thái" />
+              <SelectValue placeholder="Học kỳ" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="paid">Đã thanh toán</SelectItem>
-              <SelectItem value="inpaid">Chưa thanh toán</SelectItem>
-              <SelectItem value="processing">Thanh toán 1 phần</SelectItem>
+              <SelectItem value="paid">Học kỳ 1</SelectItem>
+              <SelectItem value="inpaid">Học kỳ 2</SelectItem>
+              <SelectItem value="processing">Cả năm</SelectItem>
             </SelectContent>
           </Select>
           <Select>
@@ -103,6 +105,14 @@ export function DataTable<TData extends object, TValue>({
               <SelectItem value="2024-2025">2024-2025</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+        <div className="flex justify-start">
+          <div className="relative">
+            <PlusCircle className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white" />
+            <Button className="pl-12 h-[40px]">
+              <Link href="/supervisor/fault/add">Thêm</Link>
+            </Button>{" "}
+          </div>
         </div>
       </div>
       <div className="rounded-md">
