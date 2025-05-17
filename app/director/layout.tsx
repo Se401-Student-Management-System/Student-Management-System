@@ -236,7 +236,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               </div>
               <AccordionContent className="w-full">
                 <Link
-                  href="/director/manage/teacher"
+                  href="/director/manage/teacher/list"
                   className="block w-full py-2 px-2 text-black hover:bg-gray-200"
                 >
                   Giáo viên
