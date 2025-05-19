@@ -113,6 +113,14 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   Danh hiệu
                 </Link>
               </AccordionContent>{" "}
+              <AccordionContent className="w-full">
+                <Link
+                  href="/director/tuition"
+                  className="block w-full py-2 px-2 text-black hover:bg-gray-200"
+                >
+                  Học phí
+                </Link>
+              </AccordionContent>{" "}
             </AccordionItem>
             {/* Thống kê */}
             <AccordionItem value="quanly" className="w-full mb-[10px]">
