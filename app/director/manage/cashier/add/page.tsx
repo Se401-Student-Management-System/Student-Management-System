@@ -4,7 +4,6 @@ import React from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { LogOut, Save } from "lucide-react";
 import { useForm } from "react-hook-form";
 import {
   Form,
@@ -25,17 +24,16 @@ import {
 } from "@/components/ui/select";
 
 const formSchema = z.object({
-  teacherName: z.string(),
+  id: z.string(),
+  name: z.string(),
   email: z.string().email(),
   phone: z.string().min(10).max(11),
   address: z.string(),
   gender: z.string(),
-  position: z.string(),
-  username: z.string(),
-  password: z.string(),
+  birthDate: z.string(),
 });
 
-export default function AddTeacher() {
+export default function AddCashier() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
@@ -47,26 +45,22 @@ export default function AddTeacher() {
   return (
     <div>
       <div className="relative justify-start text-black text-base font-normal font-['Inter']">
-        Quản lý / Giáo viên / Thêm giáo viên
+        Quản lý / Thu ngân / Thêm thu ngân
       </div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
-          {/* Thông tin tài khoản */}
-          <div className="relative justify-start text-primary text-base font-bold font-['Inter'] mt-[10px]">
-            Thông tin tài khoản
-          </div>
           <div className="w-full self-stretch inline-flex justify-between items-center mt-[10px]">
             <div className="w-[500px] inline-flex flex-col justify-start items-start gap-5">
               <FormField
                 control={form.control}
-                name="username"
+                name="id"
                 render={({ field }) => (
                   <FormItem className="w-full flex flex-col">
-                    <FormLabel className="font-normal">Tài khoản</FormLabel>
+                    <FormLabel>MSTN</FormLabel>
                     <FormControl>
                       <Input
                         className="w-full"
-                        placeholder="Tên đăng nhập"
+                        placeholder="Mã số thu ngân"
                         {...field}
                       />
                     </FormControl>
@@ -74,41 +68,12 @@ export default function AddTeacher() {
                   </FormItem>
                 )}
               />
-            </div>
-            <div className="w-[500px] inline-flex flex-col justify-start items-start gap-5 mt-0">
               <FormField
                 control={form.control}
-                name="password"
+                name="name"
                 render={({ field }) => (
                   <FormItem className="w-full flex flex-col">
-                    <FormLabel className="font-normal">Mật khẩu</FormLabel>
-                    <FormControl>
-                      <Input
-                        className="w-full"
-                        type="password"
-                        placeholder="Mật khẩu"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
-
-          {/* Thông tin giáo viên */}
-          <div className="relative justify-start text-primary text-base font-bold font-['Inter'] mt-[20px]">
-            Thông tin giáo viên
-          </div>
-          <div className="w-full self-stretch inline-flex justify-between items-center mt-[10px]">
-            <div className="w-[500px] inline-flex flex-col justify-start items-start gap-5">
-              <FormField
-                control={form.control}
-                name="teacherName"
-                render={({ field }) => (
-                  <FormItem className="w-full flex flex-col">
-                    <FormLabel className="font-normal">Họ tên giáo viên</FormLabel>
+                    <FormLabel>Họ tên</FormLabel>
                     <FormControl>
                       <Input
                         className="w-full"
@@ -125,7 +90,7 @@ export default function AddTeacher() {
                 name="email"
                 render={({ field }) => (
                   <FormItem className="w-full flex flex-col">
-                    <FormLabel className="font-normal">Email</FormLabel>
+                    <FormLabel>Email</FormLabel>
                     <FormControl>
                       <Input
                         className="w-full"
@@ -142,7 +107,7 @@ export default function AddTeacher() {
                 name="phone"
                 render={({ field }) => (
                   <FormItem className="w-full flex flex-col">
-                    <FormLabel className="font-normal">Số điện thoại</FormLabel>
+                    <FormLabel>Số điện thoại</FormLabel>
                     <FormControl>
                       <Input
                         className="w-full"
@@ -155,13 +120,30 @@ export default function AddTeacher() {
                 )}
               />
             </div>
-            <div className="w-[500px] inline-flex flex-col justify-start items-start gap-5 mt-0">
+            <div className="w-[500px] inline-flex flex-col justify-start items-start gap-5">
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem className="w-full flex flex-col">
+                    <FormLabel>Địa chỉ</FormLabel>
+                    <FormControl>
+                      <Input
+                        className="w-full"
+                        placeholder="123 Lê Lợi"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={form.control}
                 name="gender"
                 render={({ field }) => (
                   <FormItem className="w-full flex flex-col">
-                    <FormLabel className="font-normal">Giới tính</FormLabel>
+                    <FormLabel>Giới tính</FormLabel>
                     <FormControl>
                       <Select
                         onValueChange={field.onChange}
@@ -184,42 +166,12 @@ export default function AddTeacher() {
               />
               <FormField
                 control={form.control}
-                name="position"
+                name="birthDate"
                 render={({ field }) => (
                   <FormItem className="w-full flex flex-col">
-                    <FormLabel className="font-normal">Chức vụ</FormLabel>
+                    <FormLabel>Ngày sinh</FormLabel>
                     <FormControl>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                        defaultValue={field.value}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Chọn chức vụ" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Tổ trưởng">Tổ trưởng</SelectItem>
-                          <SelectItem value="Tổ phó">Tổ phó</SelectItem>
-                          <SelectItem value="Giáo viên">Giáo viên</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="address"
-                render={({ field }) => (
-                  <FormItem className="w-full flex flex-col">
-                    <FormLabel className="font-normal">Địa chỉ</FormLabel>
-                    <FormControl>
-                      <Input
-                        className="w-full"
-                        placeholder="123 Thủ Đức"
-                        {...field}
-                      />
+                      <Input className="w-full" type="date" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -227,24 +179,8 @@ export default function AddTeacher() {
               />
             </div>
           </div>
-          {/* Button */}
-          <div className="w-full self-stretch self-stretch inline-flex flex-col justify-start items-end gap-5 overflow-hidden mt-[15px]">
-            <div className="inline-flex justify-start items-start gap-[29px]">
-              <div className="relative">
-                <LogOut className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white" />
-                <Button variant={"secondary"} className="pl-12" type="button">
-                  <Link href="/director/manage/teacher/list" className="text-white">
-                    Thoát
-                  </Link>
-                </Button>
-              </div>
-              <div className="relative">
-                <Save className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white" />
-                <Button className="pl-12" type="submit">
-                  Lưu
-                </Button>
-              </div>
-            </div>
+          <div className="w-full flex justify-end mt-6">
+            <Button type="submit">Lưu</Button>
           </div>
         </form>
       </Form>

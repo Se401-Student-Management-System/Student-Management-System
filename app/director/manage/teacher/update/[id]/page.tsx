@@ -25,17 +25,17 @@ import {
 } from "@/components/ui/select";
 
 const formSchema = z.object({
+  username: z.string(),
+  password: z.string(),
   teacherName: z.string(),
   email: z.string().email(),
   phone: z.string().min(10).max(11),
   address: z.string(),
   gender: z.string(),
   position: z.string(),
-  username: z.string(),
-  password: z.string(),
 });
 
-export default function AddTeacher() {
+export default function UpdateTeacher() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
@@ -47,7 +47,7 @@ export default function AddTeacher() {
   return (
     <div>
       <div className="relative justify-start text-black text-base font-normal font-['Inter']">
-        Quản lý / Giáo viên / Thêm giáo viên
+        Quản lý / Giáo viên / Cập nhật giáo viên
       </div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -64,11 +64,7 @@ export default function AddTeacher() {
                   <FormItem className="w-full flex flex-col">
                     <FormLabel className="font-normal">Tài khoản</FormLabel>
                     <FormControl>
-                      <Input
-                        className="w-full"
-                        placeholder="Tên đăng nhập"
-                        {...field}
-                      />
+                      <Input className="w-full" placeholder="Tên đăng nhập" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -83,12 +79,7 @@ export default function AddTeacher() {
                   <FormItem className="w-full flex flex-col">
                     <FormLabel className="font-normal">Mật khẩu</FormLabel>
                     <FormControl>
-                      <Input
-                        className="w-full"
-                        type="password"
-                        placeholder="Mật khẩu"
-                        {...field}
-                      />
+                      <Input className="w-full" type="password" placeholder="Mật khẩu" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -110,11 +101,7 @@ export default function AddTeacher() {
                   <FormItem className="w-full flex flex-col">
                     <FormLabel className="font-normal">Họ tên giáo viên</FormLabel>
                     <FormControl>
-                      <Input
-                        className="w-full"
-                        placeholder="Nguyễn Văn A"
-                        {...field}
-                      />
+                      <Input className="w-full" placeholder="Nguyễn Văn A" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -127,11 +114,7 @@ export default function AddTeacher() {
                   <FormItem className="w-full flex flex-col">
                     <FormLabel className="font-normal">Email</FormLabel>
                     <FormControl>
-                      <Input
-                        className="w-full"
-                        placeholder="example@gmail.com"
-                        {...field}
-                      />
+                      <Input className="w-full" placeholder="example@gmail.com" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -144,11 +127,7 @@ export default function AddTeacher() {
                   <FormItem className="w-full flex flex-col">
                     <FormLabel className="font-normal">Số điện thoại</FormLabel>
                     <FormControl>
-                      <Input
-                        className="w-full"
-                        placeholder="0123456789"
-                        {...field}
-                      />
+                      <Input className="w-full" placeholder="0123456789" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -215,11 +194,7 @@ export default function AddTeacher() {
                   <FormItem className="w-full flex flex-col">
                     <FormLabel className="font-normal">Địa chỉ</FormLabel>
                     <FormControl>
-                      <Input
-                        className="w-full"
-                        placeholder="123 Thủ Đức"
-                        {...field}
-                      />
+                      <Input className="w-full" placeholder="123 Thủ Đức" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
