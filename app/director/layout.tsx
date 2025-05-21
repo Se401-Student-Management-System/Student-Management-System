@@ -74,6 +74,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuItem
+                onClick={() => router.push("/director/profile")}
+              >
+                Thông tin cá nhân
+              </DropdownMenuItem>{" "}
+              <DropdownMenuItem
                 onClick={() => router.push("/director/password")}
               >
                 Đổi mật khẩu
