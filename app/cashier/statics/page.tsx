@@ -35,7 +35,6 @@ interface FeeStats {
 
 export default function FeeStaticsPage() {
     const [year, setYear] = useState<string>("2024");
-    const [semester, setSemester] = useState<string>("Học kỳ 1");
     const [error, setError] = useState<string | undefined>(undefined);
     const [stats, setStats] = useState<FeeStats>({
         totalCount: 500,
@@ -53,9 +52,7 @@ export default function FeeStaticsPage() {
 
     // Tạo văn bản so sánh
     const previousYear = (parseInt(year) - 1).toString();
-    const comparisonText = semester
-        ? `so với ${semester.toLowerCase()} năm ${previousYear}`
-        : `so với năm ${previousYear}`;
+    const comparisonText = year ? `so với năm ${previousYear}` : "";
 
     // Dữ liệu cho biểu đồ tròn
     const pieData = [
@@ -96,7 +93,7 @@ export default function FeeStaticsPage() {
         }
     };
     fetchData();
-    }, [year, semester]);
+    }, [year]);
 
     return (
         <div className="p-6">
@@ -116,15 +113,6 @@ export default function FeeStaticsPage() {
                         {y}
                     </SelectItem>
                     ))}
-                </SelectContent>
-                </Select>
-                <Select value={semester} onValueChange={setSemester}>
-                <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Chọn học kỳ" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="Học kỳ 1">Học kỳ 1</SelectItem>
-                    <SelectItem value="Học kỳ 2">Học kỳ 2</SelectItem>
                 </SelectContent>
                 </Select>
             </form>

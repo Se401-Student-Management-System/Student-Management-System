@@ -16,7 +16,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Toaster } from "@/components/ui/sonner";
 import { ChevronDown, NotebookPen } from "lucide-react";
 
@@ -25,6 +25,7 @@ interface CashierLayoutProps {
 }
 
 export default function CashierLayout ({ children }: CashierLayoutProps) {
+    const pathname = usePathname();
     const [isLoading, setIsLoading] = useState(false);
     const [userName, setUserName] = useState<string>("");
     const router = useRouter();
@@ -55,11 +56,11 @@ export default function CashierLayout ({ children }: CashierLayoutProps) {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                         <DropdownMenuItem
-                            onClick={() => router.push("/cashier/password")}
+                            onClick={() => router.push("/supervisor/password")}
                         >
                             Đổi mật khẩu
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => router.push("/cashier/profile")}>
+                        <DropdownMenuItem onClick={() => router.push("/supervisor/profile")}>
                             Profile
                         </DropdownMenuItem>{" "}
                         <DropdownMenuItem onClick={handleLogout} disabled={isLoading}>
@@ -91,7 +92,11 @@ export default function CashierLayout ({ children }: CashierLayoutProps) {
                             <AccordionContent className="w-full">
                                 <Link
                                 href="/supervisor/fault"
-                                className="block w-full py-2 px-2 text-black hover:bg-gray-200"
+                                className={`block w-full py-2 px-2 text-black hover:bg-gray-200 ${
+                                    pathname === "/supervisor/fault" || pathname === "/supervisor/fault/add"
+                                    ? "bg-primary text-white font-bold"
+                                    : "text-black"
+                                }`} 
                                 >
                                 Thông tin vi phạm
                                 </Link>
@@ -99,7 +104,11 @@ export default function CashierLayout ({ children }: CashierLayoutProps) {
                             <AccordionContent className="w-full">
                                 <Link
                                 href="/supervisor/category"
-                                className="block w-full py-2 px-2 text-black hover:bg-gray-200"
+                                className={`block w-full py-2 px-2 text-black hover:bg-gray-200 ${
+                                    pathname === "/supervisor/category" || pathname === "/supervisor/category/add"
+                                    ? "bg-primary text-white font-bold"
+                                    : "text-black"
+                                }`} 
                                 >
                                 Danh mục vi phạm
                                 </Link>

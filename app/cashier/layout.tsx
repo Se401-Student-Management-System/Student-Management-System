@@ -16,7 +16,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Toaster } from "@/components/ui/sonner";
 import { ChartColumnBig, ChevronDown, Ticket } from "lucide-react";
 
@@ -25,6 +25,7 @@ interface CashierLayoutProps {
 }
 
 export default function CashierLayout ({ children }: CashierLayoutProps) {
+    const pathname = usePathname();
     const [isLoading, setIsLoading] = useState(false);
     const [userName, setUserName] = useState<string>("");
     const router = useRouter();
@@ -92,7 +93,11 @@ export default function CashierLayout ({ children }: CashierLayoutProps) {
                             <AccordionContent className="w-full">
                                 <Link
                                 href="/cashier/statics"
-                                className="block w-full py-2 px-2 text-black hover:bg-gray-200"
+                                className={`block w-full py-2 px-2 text-black hover:bg-gray-200 ${
+                                    pathname === "/cashier/statics"
+                                    ? "bg-primary text-white font-bold"
+                                    : "text-black"
+                                }`} 
                                 >
                                 Học phí
                                 </Link>
@@ -116,7 +121,11 @@ export default function CashierLayout ({ children }: CashierLayoutProps) {
                             <AccordionContent className="w-full">
                                 <Link
                                 href="/cashier/payment"
-                                className="block w-full py-2 px-2 text-black hover:bg-gray-200"
+                                className={`block w-full py-2 px-2 text-black hover:bg-gray-200 ${
+                                    pathname === "/cashier/payment"
+                                    ? "bg-primary text-white font-bold"
+                                    : "text-black"
+                                }`} 
                                 >
                                 Lịch sử thanh toán
                                 </Link>
@@ -124,7 +133,11 @@ export default function CashierLayout ({ children }: CashierLayoutProps) {
                             <AccordionContent className="w-full">
                                 <Link
                                 href="/cashier/invoice"
-                                className="block w-full py-2 px-2 text-black hover:bg-gray-200"
+                                className={`block w-full py-2 px-2 text-black hover:bg-gray-200 ${
+                                    pathname === "/cashier/invoice" || pathname === "/cashier/invoice/add"
+                                    ? "bg-primary text-white font-bold"
+                                    : "text-black"
+                                }`} 
                                 >
                                 Danh sách hóa đơn
                                 </Link>
