@@ -5,14 +5,13 @@ import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 
 export interface StudentRecord {
-  id: string;
+  stt: number;
+  studentId: string;
   studentName: string;
-  email: string;
-  class: string;
+  className: string;
   mathScore: string;
-  physicalScore: string;
-  chemistryScore: string;
-  biologyScore: string;
+  literatureScore: string;
+  englishScore: string;
   averageScore: string;
   grade: string;
   conduct: string;
@@ -21,168 +20,102 @@ export interface StudentRecord {
 
 export const columns: ColumnDef<StudentRecord>[] = [
   {
-    accessorKey: "id",
-    header: ({ column }) => {
-      return (
-        <Button
-          className="pl-0"
-          variant="ghost"
-          style={{ backgroundColor: "transparent" }}
-        >
-          ID
-        </Button>
-      );
-    },
-    cell: ({ row }) => <div>{row.getValue("id")}</div>,
+    accessorKey: "stt",
+    header: ({ column }) => (
+      <Button className="pl-0" variant="ghost" style={{ backgroundColor: "transparent" }}>
+        STT
+      </Button>
+    ),
+    cell: ({ row }) => <div>{row.getValue("stt")}</div>,
+  },
+  {
+    accessorKey: "studentId",
+    header: ({ column }) => (
+      <Button className="pl-0" variant="ghost" style={{ backgroundColor: "transparent" }}>
+        Mã HS
+      </Button>
+    ),
+    cell: ({ row }) => <div>{row.getValue("studentId")}</div>,
   },
   {
     accessorKey: "studentName",
-    header: ({ column }) => {
-      return (
-        <Button
-          className="pl-0"
-          variant="ghost"
-          style={{ backgroundColor: "transparent" }}
-        >
-          Tên học sinh
-        </Button>
-      );
-    },
+    header: ({ column }) => (
+      <Button className="pl-0" variant="ghost" style={{ backgroundColor: "transparent" }}>
+        Họ tên
+      </Button>
+    ),
     cell: ({ row }) => <div>{row.getValue("studentName")}</div>,
   },
   {
-    accessorKey: "email",
-    header: ({ column }) => {
-      return (
-        <Button
-          className="pl-0"
-          variant="ghost"
-          style={{ backgroundColor: "transparent" }}
-        >
-          Email
-        </Button>
-      );
-    },
-    cell: ({ row }) => <div>{row.getValue("email")}</div>,
-  },
-  {
-    accessorKey: "class",
-    header: ({ column }) => {
-      return (
-        <Button
-          className="pl-0"
-          variant="ghost"
-          style={{ backgroundColor: "transparent" }}
-        >
-          Lớp học
-        </Button>
-      );
-    },
-    cell: ({ row }) => <div>{row.getValue("class")}</div>,
+    accessorKey: "className",
+    header: ({ column }) => (
+      <Button className="pl-0" variant="ghost" style={{ backgroundColor: "transparent" }}>
+        Lớp
+      </Button>
+    ),
+    cell: ({ row }) => <div>{row.getValue("className")}</div>,
   },
   {
     accessorKey: "mathScore",
-    header: ({ column }) => {
-      return (
-        <Button
-          className="pl-0"
-          variant="ghost"
-          style={{ backgroundColor: "transparent" }}
-        >
-          Toán học
-        </Button>
-      );
-    },
+    header: ({ column }) => (
+      <Button className="pl-0" variant="ghost" style={{ backgroundColor: "transparent" }}>
+        Toán học
+      </Button>
+    ),
     cell: ({ row }) => <div>{row.getValue("mathScore")}</div>,
   },
   {
-    accessorKey: "physicalScore",
-    header: ({ column }) => {
-      return (
-        <Button
-          className="pl-0"
-          variant="ghost"
-          style={{ backgroundColor: "transparent" }}
-        >
-          Vật lý
-        </Button>
-      );
-    },
-    cell: ({ row }) => <div>{row.getValue("physicalScore")}</div>,
+    accessorKey: "literatureScore",
+    header: ({ column }) => (
+      <Button className="pl-0" variant="ghost" style={{ backgroundColor: "transparent" }}>
+        Ngữ Văn
+      </Button>
+    ),
+    cell: ({ row }) => <div>{row.getValue("literatureScore")}</div>,
   },
   {
-    accessorKey: "chemistryScore",
-    header: ({ column }) => {
-      return (
-        <Button
-          className="pl-0"
-          variant="ghost"
-          style={{ backgroundColor: "transparent" }}
-        >
-          Hóa học
-        </Button>
-      );
-    },
-    cell: ({ row }) => <div>{row.getValue("chemistryScore")}</div>,
+    accessorKey: "englishScore",
+    header: ({ column }) => (
+      <Button className="pl-0" variant="ghost" style={{ backgroundColor: "transparent" }}>
+        Tiếng Anh
+      </Button>
+    ),
+    cell: ({ row }) => <div>{row.getValue("englishScore")}</div>,
   },
   {
     accessorKey: "averageScore",
-    header: ({ column }) => {
-      return (
-        <Button
-          className="pl-0"
-          variant="ghost"
-          style={{ backgroundColor: "transparent" }}
-        >
-          Điểm trung bình
-        </Button>
-      );
-    },
+    header: ({ column }) => (
+      <Button className="pl-0" variant="ghost" style={{ backgroundColor: "transparent" }}>
+        Điểm Trung Bình
+      </Button>
+    ),
     cell: ({ row }) => <div>{row.getValue("averageScore")}</div>,
   },
   {
     accessorKey: "grade",
-    header: ({ column }) => {
-      return (
-        <Button
-          className="pl-0"
-          variant="ghost"
-          style={{ backgroundColor: "transparent" }}
-        >
-          Học lực
-        </Button>
-      );
-    },
+    header: ({ column }) => (
+      <Button className="pl-0" variant="ghost" style={{ backgroundColor: "transparent" }}>
+        Học lực
+      </Button>
+    ),
     cell: ({ row }) => <div>{row.getValue("grade")}</div>,
   },
   {
     accessorKey: "conduct",
-    header: ({ column }) => {
-      return (
-        <Button
-          className="pl-0"
-          variant="ghost"
-          style={{ backgroundColor: "transparent" }}
-        >
-          Hạnh kiểm
-        </Button>
-      );
-    },
+    header: ({ column }) => (
+      <Button className="pl-0" variant="ghost" style={{ backgroundColor: "transparent" }}>
+        Hạnh kiểm
+      </Button>
+    ),
     cell: ({ row }) => <div>{row.getValue("conduct")}</div>,
   },
   {
     accessorKey: "title",
-    header: ({ column }) => {
-      return (
-        <Button
-          className="pl-0"
-          variant="ghost"
-          style={{ backgroundColor: "transparent" }}
-        >
-          Danh hiệu
-        </Button>
-      );
-    },
+    header: ({ column }) => (
+      <Button className="pl-0" variant="ghost" style={{ backgroundColor: "transparent" }}>
+        Danh hiệu
+      </Button>
+    ),
     cell: ({ row }) => <div>{row.getValue("title")}</div>,
   },
 ];

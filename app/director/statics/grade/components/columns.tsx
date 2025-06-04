@@ -3,19 +3,17 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
-import Link from "next/link";
-import { Pencil, Trash } from "lucide-react";
 
 export interface GradeStatics {
-  id: string;
-  studentName: string;
-  class: string;
-  score: string;
+  studentId: string;
+  fullName: string;
+  className: string;
+  averageScore: number;
 }
 
 export const columns: ColumnDef<GradeStatics>[] = [
   {
-    accessorKey: "id",
+    accessorKey: "studentId",
     header: ({ column }) => {
       return (
         <Button
@@ -27,10 +25,10 @@ export const columns: ColumnDef<GradeStatics>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => <div>{row.getValue("id")}</div>,
+    cell: ({ row }) => <div>{row.getValue("studentId")}</div>,
   },
   {
-    accessorKey: "studentName",
+    accessorKey: "fullName",
     header: ({ column }) => {
       return (
         <Button
@@ -42,10 +40,10 @@ export const columns: ColumnDef<GradeStatics>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => <div>{row.getValue("studentName")}</div>,
+    cell: ({ row }) => <div>{row.getValue("fullName")}</div>,
   },
   {
-    accessorKey: "class",
+    accessorKey: "className",
     header: ({ column }) => {
       return (
         <Button
@@ -57,10 +55,10 @@ export const columns: ColumnDef<GradeStatics>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => <div>{row.getValue("class")}</div>,
+    cell: ({ row }) => <div>{row.getValue("className")}</div>,
   },
   {
-    accessorKey: "score",
+    accessorKey: "averageScore",
     header: ({ column }) => {
       return (
         <Button
@@ -72,6 +70,6 @@ export const columns: ColumnDef<GradeStatics>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => <div>{row.getValue("score")}</div>,
+    cell: ({ row }) => <div>{row.getValue("averageScore")}</div>,
   },
 ];

@@ -3,19 +3,18 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
-import Link from "next/link";
-import { Pencil, Trash } from "lucide-react";
 
 export interface ConductStatics {
-  id: string;
-  studentName: string;
-  class: string;
-  faultTime: string;
+  studentId: string;
+  fullName: string;
+  className: string;
+  behaviorScore: number;
+  violationCount: number;
 }
 
 export const columns: ColumnDef<ConductStatics>[] = [
   {
-    accessorKey: "id",
+    accessorKey: "studentId",
     header: ({ column }) => {
       return (
         <Button
@@ -27,10 +26,10 @@ export const columns: ColumnDef<ConductStatics>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => <div>{row.getValue("id")}</div>,
+    cell: ({ row }) => <div>{row.getValue("studentId")}</div>,
   },
   {
-    accessorKey: "studentName",
+    accessorKey: "fullName",
     header: ({ column }) => {
       return (
         <Button
@@ -38,14 +37,14 @@ export const columns: ColumnDef<ConductStatics>[] = [
           variant="ghost"
           style={{ backgroundColor: "transparent" }}
         >
-          Tên học sinh
+          Họ tên
         </Button>
       );
     },
-    cell: ({ row }) => <div>{row.getValue("studentName")}</div>,
+    cell: ({ row }) => <div>{row.getValue("fullName")}</div>,
   },
   {
-    accessorKey: "class",
+    accessorKey: "className",
     header: ({ column }) => {
       return (
         <Button
@@ -53,14 +52,29 @@ export const columns: ColumnDef<ConductStatics>[] = [
           variant="ghost"
           style={{ backgroundColor: "transparent" }}
         >
-          Lớp học
+          Lớp
         </Button>
       );
     },
-    cell: ({ row }) => <div>{row.getValue("class")}</div>,
+    cell: ({ row }) => <div>{row.getValue("className")}</div>,
   },
   {
-    accessorKey: "faultTime",
+    accessorKey: "behaviorScore",
+    header: ({ column }) => {
+      return (
+        <Button
+          className="pl-0"
+          variant="ghost"
+          style={{ backgroundColor: "transparent" }}
+        >
+          Điểm hạnh kiểm
+        </Button>
+      );
+    },
+    cell: ({ row }) => <div>{row.getValue("behaviorScore")}</div>,
+  },
+  {
+    accessorKey: "violationCount",
     header: ({ column }) => {
       return (
         <Button
@@ -72,6 +86,6 @@ export const columns: ColumnDef<ConductStatics>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => <div>{row.getValue("faultTime")}</div>,
+    cell: ({ row }) => <div>{row.getValue("violationCount")}</div>,
   },
 ];

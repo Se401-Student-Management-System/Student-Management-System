@@ -11,41 +11,58 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-// Chuyển data về dạng 1 object chứa các loại học sinh
-const data = [
+interface ConductData {
+  goodCount: number;
+  fairCount: number;
+  averageCount: number;
+  poorCount: number;
+}
+
+interface EleventhChartProps {
+  data: ConductData;
+}
+
+const chartData = (data: ConductData) => [
   {
     name: "Khối 11",
-    gioi: 60,
-    trungBinh: 25,
-    yeu: 5,
+    tot: data.goodCount,
+    kha: data.fairCount,
+    trungBinh: data.averageCount,
+    yeu: data.poorCount,
   },
 ];
 
-export default function EleventhChart() {
+export default function EleventhChart({ data }: EleventhChartProps) {
   return (
     <div className="w-full h-80">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data}>
+        <BarChart data={chartData(data)}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="name" />
           <YAxis />
           <Tooltip />
           <Bar
-            dataKey="gioi"
+            dataKey="tot"
             fill="#01427A"
-            name="Học sinh giỏi"
+            name="Hạnh kiểm Tốt"
+            radius={[4, 4, 0, 0]}
+          />
+          <Bar
+            dataKey="kha"
+            fill="#01B3EF"
+            name="Hạnh kiểm Khá"
             radius={[4, 4, 0, 0]}
           />
           <Bar
             dataKey="trungBinh"
-            fill="#01B3EF"
-            name="Học sinh trung bình"
+            fill="#F59E0B"
+            name="Hạnh kiểm Trung bình"
             radius={[4, 4, 0, 0]}
           />
           <Bar
             dataKey="yeu"
             fill="#E14177"
-            name="Học sinh yếu"
+            name="Hạnh kiểm Yếu"
             radius={[4, 4, 0, 0]}
           />
         </BarChart>
