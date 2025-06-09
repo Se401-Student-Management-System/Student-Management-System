@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { add, min } from "date-fns";
 import {
   Select,
   SelectContent,
@@ -24,6 +23,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useRouter } from "next/navigation";
+import {toast} from "sonner";
 
 const formSchema = z.object({
   username: z.string(),
@@ -33,19 +34,54 @@ const formSchema = z.object({
   phone: z.string().min(10).max(11),
   address: z.string(),
   gender: z.string(),
-  class: z.string(),
   dateOfBirth: z.string(),
   nation: z.string(),
   country: z.string(),
 });
 
 export default function addStudent() {
+  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const payload = {
+      username: values.username,
+      password: values.password,
+      email: values.email,
+      fullName: values.studentName,
+      phoneNumber: values.phone,
+      address: values.address,
+      gender:
+        values.gender === "male"
+          ? "Nam"
+          : values.gender === "female"
+          ? "Nữ"
+          : "Khác",
+      birthDate: values.dateOfBirth,
+      roleId: "1",
+      entity: "Student",
+      ethnicity: values.nation,
+      birthPlace: values.country,
+      status: "PENDING",
+    };
+
+    try {
+      const res = await fetch("http://localhost:8080/director/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      console.log("Tạo học sinh thành công:", data);
+      toast.success("Tạo học sinh thành công");
+      router.push("/director/student/list");
+    } catch (err) {
+      console.log("Tạo học sinh thất bại: " + err);
+      toast.error("Tạo học sinh thất bại");
+    }
   }
 
   return (
@@ -164,7 +200,7 @@ export default function addStudent() {
           </div>
           <div className="w-full self-stretch inline-flex justify-between items-center mt-[10px]">
             <div className="w-[500px] inline-flex justify-between items-start gap-2">
-              <div className="w-1/3 flex flex-col">
+              <div className="w-1/2 flex flex-col">
                 <FormField
                   control={form.control}
                   name="gender"
@@ -174,8 +210,8 @@ export default function addStudent() {
                       <FormControl>
                         <Select
                           onValueChange={field.onChange}
-                          value={field.value}
-                          defaultValue={field.value}
+                          value={field.value ?? ""}
+                          defaultValue={field.value ?? ""}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Chọn giới tính" />
@@ -192,7 +228,7 @@ export default function addStudent() {
                   )}
                 />
               </div>
-              <div className="w-1/3 flex flex-col">
+              {/* <div className="w-1/3 flex flex-col">
                 <FormField
                   control={form.control}
                   name="class"
@@ -219,8 +255,8 @@ export default function addStudent() {
                     </FormItem>
                   )}
                 />
-              </div>
-              <div className="w-1/3 flex flex-col">
+              </div> */}
+              <div className="w-1/2 flex flex-col">
                 <FormField
                   control={form.control}
                   name="dateOfBirth"
@@ -287,7 +323,7 @@ export default function addStudent() {
               <div className="relative">
                 <Save className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white" />
                 <Button className="pl-12" type="submit">
-                  <Link href="/student/list">Lưu</Link>
+                  Lưu
                 </Button>{" "}
               </div>
             </div>

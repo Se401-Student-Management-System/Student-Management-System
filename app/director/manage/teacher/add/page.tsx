@@ -23,6 +23,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {toast} from "sonner";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   teacherName: z.string(),
@@ -31,17 +33,54 @@ const formSchema = z.object({
   address: z.string(),
   gender: z.string(),
   position: z.string(),
+  status: z.string(),
   username: z.string(),
   password: z.string(),
+  dateOfBirth: z.string(),
 });
 
 export default function AddTeacher() {
+  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const payload = {
+      username: values.username,
+      password: values.password,
+      email: values.email,
+      fullName: values.teacherName,
+      phoneNumber: values.phone,
+      address: values.address,
+      gender:
+        values.gender === "male"
+          ? "Nam"
+          : values.gender === "female"
+          ? "Nữ"
+          : "Khác",
+      birthDate: values.dateOfBirth,
+      roleId: "2",
+      entity: "Teacher",
+      position: values.position,
+      status: values.status,
+    };
+
+    try {
+      const res = await fetch("http://localhost:8080/director/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      console.log("Tạo giáo viên thành công:", data);
+      toast.success("Tạo giáo viên thành công");
+      router.push("/director/manage/teacher/list");
+    } catch (err) {
+      console.log("Tạo giáo viên thất bại: " + err);
+      toast.error("Tạo giáo viên thất bại");
+    }
   }
 
   return (
@@ -64,42 +103,31 @@ export default function AddTeacher() {
                   <FormItem className="w-full flex flex-col">
                     <FormLabel className="font-normal">Tài khoản</FormLabel>
                     <FormControl>
-                      <Input
-                        className="w-full"
-                        placeholder="Tên đăng nhập"
-                        {...field}
-                      />
+                      <Input placeholder="username" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-            <div className="w-[500px] inline-flex flex-col justify-start items-start gap-5 mt-0">
+            <div className="w-[500px] inline-flex flex-col justify-start items-start gap-5">
               <FormField
                 control={form.control}
                 name="password"
                 render={({ field }) => (
                   <FormItem className="w-full flex flex-col">
                     <FormLabel className="font-normal">Mật khẩu</FormLabel>
-                    <FormControl>
-                      <Input
-                        className="w-full"
-                        type="password"
-                        placeholder="Mật khẩu"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
+                      <FormControl>
+                        <Input placeholder="123abc" {...field} />
+                      </FormControl>
+                      <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
           </div>
-
-          {/* Thông tin giáo viên */}
-          <div className="relative justify-start text-primary text-base font-bold font-['Inter'] mt-[20px]">
-            Thông tin giáo viên
+          <div className="relative justify-start text-primary text-base font-bold font-['Inter'] mt-[10px]">
+            Thông tin cá nhân
           </div>
           <div className="w-full self-stretch inline-flex justify-between items-center mt-[10px]">
             <div className="w-[500px] inline-flex flex-col justify-start items-start gap-5">
@@ -108,18 +136,18 @@ export default function AddTeacher() {
                 name="teacherName"
                 render={({ field }) => (
                   <FormItem className="w-full flex flex-col">
-                    <FormLabel className="font-normal">Họ tên giáo viên</FormLabel>
+                    <FormLabel className="font-normal">
+                      Họ tên giáo viên
+                    </FormLabel>
                     <FormControl>
-                      <Input
-                        className="w-full"
-                        placeholder="Nguyễn Văn A"
-                        {...field}
-                      />
+                      <Input placeholder="Nguyễn Văn A" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+            </div>
+            <div className="w-[500px] inline-flex flex-col justify-start items-start gap-5">
               <FormField
                 control={form.control}
                 name="email"
@@ -127,16 +155,16 @@ export default function AddTeacher() {
                   <FormItem className="w-full flex flex-col">
                     <FormLabel className="font-normal">Email</FormLabel>
                     <FormControl>
-                      <Input
-                        className="w-full"
-                        placeholder="example@gmail.com"
-                        {...field}
-                      />
+                      <Input placeholder="example@gmail.com" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+            </div>
+          </div>
+          <div className="w-full self-stretch inline-flex justify-between items-center mt-[10px]">
+            <div className="w-[500px] inline-flex flex-col justify-start items-start gap-5">
               <FormField
                 control={form.control}
                 name="phone"
@@ -144,87 +172,135 @@ export default function AddTeacher() {
                   <FormItem className="w-full flex flex-col">
                     <FormLabel className="font-normal">Số điện thoại</FormLabel>
                     <FormControl>
-                      <Input
-                        className="w-full"
-                        placeholder="0123456789"
-                        {...field}
-                      />
+                      <Input placeholder="0123456789" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-            <div className="w-[500px] inline-flex flex-col justify-start items-start gap-5 mt-0">
-              <FormField
-                control={form.control}
-                name="gender"
-                render={({ field }) => (
-                  <FormItem className="w-full flex flex-col">
-                    <FormLabel className="font-normal">Giới tính</FormLabel>
-                    <FormControl>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                        defaultValue={field.value}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Chọn giới tính" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Nam">Nam</SelectItem>
-                          <SelectItem value="Nữ">Nữ</SelectItem>
-                          <SelectItem value="Khác">Khác</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="position"
-                render={({ field }) => (
-                  <FormItem className="w-full flex flex-col">
-                    <FormLabel className="font-normal">Chức vụ</FormLabel>
-                    <FormControl>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                        defaultValue={field.value}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Chọn chức vụ" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Tổ trưởng">Tổ trưởng</SelectItem>
-                          <SelectItem value="Tổ phó">Tổ phó</SelectItem>
-                          <SelectItem value="Giáo viên">Giáo viên</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <div className="w-[500px] inline-flex flex-col justify-start items-start gap-5">
               <FormField
                 control={form.control}
                 name="address"
                 render={({ field }) => (
-                  <FormItem className="w-full flex flex-col">
+                   <FormItem className="w-full flex flex-col">
                     <FormLabel className="font-normal">Địa chỉ</FormLabel>
                     <FormControl>
-                      <Input
-                        className="w-full"
-                        placeholder="123 Thủ Đức"
-                        {...field}
-                      />
+                      <Input placeholder="123 Thủ Đức" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+            </div>
+          </div>
+          <div className="w-full self-stretch inline-flex justify-between items-center mt-[10px]">
+            <div className="w-[500px] inline-flex justify-between items-start gap-2">
+              <div className="w-1/2 flex flex-col">
+                <FormField
+                  control={form.control}
+                  name="gender"
+                  render={({ field }) => (
+                    <FormItem className="w-full flex flex-col">
+                      <FormLabel className="font-normal">Giới tính</FormLabel>
+                      <FormControl>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value ?? ""}
+                          defaultValue={field.value ?? ""}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Chọn giới tính" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="male">Nam</SelectItem>
+                            <SelectItem value="female">Nữ</SelectItem>
+                            <SelectItem value="other">Khác</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="w-1/2 flex flex-col">
+                <FormField
+                  control={form.control}
+                  name="dateOfBirth"
+                  render={({ field }) => (
+                    <FormItem className="w-full flex flex-col">
+                      <FormLabel className="font-normal">Ngày sinh</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="date"
+                          {...field}
+                          value={field.value ?? ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+            <div className="w-[500px] inline-flex justify-between items-start gap-2">
+              <div className="w-1/2 flex flex-col">
+                <FormField
+                  control={form.control}
+                  name="position"
+                  render={({ field }) => (
+                    <FormItem className="w-full flex flex-col">
+                      <FormLabel className="font-normal">Chức vụ</FormLabel>
+                      <FormControl>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value ?? ""}
+                          defaultValue={field.value ?? ""}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Chọn chức vụ" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="leader">Tổ trưởng</SelectItem>
+                            <SelectItem value="deputy">Tổ phó</SelectItem>
+                            <SelectItem value="teacher">Giáo viên</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="w-1/2 flex flex-col">
+                <FormField
+                  control={form.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem className="w-full flex flex-col">
+                      <FormLabel className="font-normal">Trạng thái</FormLabel>
+                      <FormControl>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value ?? ""}
+                          defaultValue={field.value ?? ""}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Chọn trạng thái" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="active">Đang giảng dạy</SelectItem>
+                            <SelectItem value="quit">Thôi việc</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+              </div>
             </div>
           </div>
           {/* Button */}
