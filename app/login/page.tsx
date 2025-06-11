@@ -19,7 +19,7 @@ import Link from "next/link";
 
 // Schema validate
 const loginSchema = z.object({
-  email: z.string().email("Email không hợp lệ"),
+  username: z.string(),
   password: z.string().min(6, "Mật khẩu phải ít nhất 6 ký tự"),
 });
 
@@ -30,12 +30,43 @@ export default function PageLogin() {
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
+      username: "",
       password: "",
     },
   });
 
-  const onSubmit = async (data: any) => {};
+  const onSubmit = async (data: any) => {
+    setIsLoading(true);
+    try {
+      const res = await fetch("http://localhost:8080/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: data.username,
+          password: data.password,
+          role: "Student",
+        }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const result = await res.json();
+      if (result.userId) {
+        localStorage.setItem("userId", result.userId);
+      }
+      if (result.role) {
+        localStorage.setItem("role", result.role);
+      }
+      if (result.studentId) {
+        localStorage.setItem("studentId", result.studentId);
+      }
+      localStorage.setItem("account", JSON.stringify(result.account));
+      toast.success("Đăng nhập thành công!");
+      router.push("/student/score");
+    } catch (err) {
+      toast.error("Đăng nhập thất bại: " + err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="w-full h-full bg-white inline-flex flex-col justify-start items-start overflow-hidden">
@@ -72,12 +103,12 @@ export default function PageLogin() {
 
                 <FormField
                   control={form.control}
-                  name="email"
+                  name="username"
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
                         <Input
-                          type="email"
+                          type="text"
                           placeholder="Email"
                           className="w-[460px] h-[60px] p-2.5 rounded-[5px] placeholder:text-gray-400"
                           {...field}
@@ -108,8 +139,8 @@ export default function PageLogin() {
 
                 <Button
                   type="submit"
-                  disabled={isLoading} // Disable khi loading
-                  className="w-[500px] h-[40px] p-2.5 bg-secondary rounded-[5px] inline-flex justify-center items-center gap-2.5 overflow-hidden mb-[20px]"
+                  disabled={isLoading}
+                  className="w-[500px] h-[40px] p-2.5 bg-primary rounded-[5px] inline-flex justify-center items-center gap-2.5 overflow-hidden mb-[20px]"
                 >
                   <div className="relative justify-start text-white text-[20px] font-bold font-['Inter']">
                     {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}

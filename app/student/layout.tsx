@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
 import { Toaster } from "@/components/ui/sonner";
-import { ChartColumnBig, ChevronDown, Ticket } from "lucide-react";
+import {BookOpenText, ChevronDown, Ticket } from "lucide-react";
 
 interface CashierLayoutProps {
   children: ReactNode;
@@ -59,7 +59,7 @@ export default function CashierLayout ({ children }: CashierLayoutProps) {
                         >
                             Đổi mật khẩu
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => router.push("student/profile")}>
+                        <DropdownMenuItem onClick={() => router.push("/student/profile")}>
                             Profile
                         </DropdownMenuItem>{" "}
                         <DropdownMenuItem onClick={handleLogout} disabled={isLoading}>
@@ -84,14 +84,14 @@ export default function CashierLayout ({ children }: CashierLayoutProps) {
                             <div className="w-full h-[30px] justify-between items-center inline-flex">
                                 <AccordionTrigger>
                                     <div data-svg-wrapper className="relative">
-                                        <ChartColumnBig color="#01B3EF" />
+                                        <BookOpenText color="#01B3EF" />
                                     </div>
                                     Học tập
                                 </AccordionTrigger>
                             </div>
                             <AccordionContent className="w-full">
                                 <Link
-                                href="/cashier/statics"
+                                href="/student/score"
                                 className="block w-full py-2 px-2 text-black hover:bg-gray-200"
                                 >
                                 Xem điểm

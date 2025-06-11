@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import { DataTable } from "./components/data-table";
 import { ScoreEntry, columns } from "./components/columns";
-import { mockScores } from "./components/data";
 import {
   Select,
   SelectContent,
@@ -11,13 +10,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Dữ liệu mẫu
-
-
 const yearList = ["2024-2025", "2023-2024", "2022-2023"];
 const semesterList = ["Học kỳ 1", "Học kỳ 2"];
 
-// Hàm tính điểm trung bình (chỉ tính các trường hợp có finalScore hợp lệ)
 function calcAverage(scores: ScoreEntry[]) {
   const valid = scores
     .map((s) => Number(s.finalScore))
@@ -31,20 +26,48 @@ export default function StudentScorePage() {
   const [year, setYear] = useState(yearList[0]);
   const [semester, setSemester] = useState(semesterList[0]);
   const [scores, setScores] = useState<ScoreEntry[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [studentId, setStudentId] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [role, setRole] = useState<string | null>(null);
 
   useEffect(() => {
-    setScores(
-      mockScores.filter(
-        (row) => row.year === year && row.semester === semester
-      )
-    );
-  }, [year, semester]);
+    if (typeof window !== "undefined") {
+      const uid = localStorage.getItem("userId");
+      const r = localStorage.getItem("role");
+      setUserId(uid);
+      setRole(r);
+      if (r === "Student") {
+        setStudentId(uid);
+      } else {
+        setStudentId(localStorage.getItem("studentId"));
+      }
+    }
+  }, []);
 
-  // Hàm xử lý xem chi tiết (nếu cần)
-  const handleViewDetails = (id: string) => {
-    // Xử lý khi click xem chi tiết, ví dụ: mở modal hoặc chuyển trang
-    // alert(`Xem chi tiết bản ghi có id: ${id}`);
-  };
+  useEffect(() => {
+    if (!studentId || !userId || !role) return;
+    setLoading(true);
+    console.log("Gọi API với:", { studentId, userId, role, year, semester });
+    fetch(
+      `http://localhost:8080/grades/${studentId}?userId=${userId}&role=${role}&semester=${
+        semester === "Học kỳ 1" ? 1 : 2
+      }&academicYear=${year}`
+    )
+      .then((res) => {
+        if (!res.ok) throw new Error("Không thể lấy dữ liệu điểm số");
+        return res.json();
+      })
+      .then((data) => {
+        console.log("Kết quả trả về:", data);
+        setScores(data);
+      })
+      .catch((e) => {
+        console.error(e);
+        setScores([]);
+      })
+      .finally(() => setLoading(false));
+  }, [year, semester, studentId, userId, role]);
 
   return (
     <div className="p-1">
@@ -86,10 +109,9 @@ export default function StudentScorePage() {
         <DataTable
           data={scores}
           columns={columns(() => {})}
-          isLoading={false}
+          isLoading={loading}
           error={undefined}
         />
-        {/* Đoạn text tính điểm trung bình nằm dưới bảng */}
         <div className="mt-4 text-base font-medium text-blue-700 text-right">
           Điểm trung bình các môn: {calcAverage(scores)}
         </div>
