@@ -1,23 +1,39 @@
 "use client";
 
-import React from "react";
-
-// Dữ liệu profile học sinh (có thể lấy từ API hoặc file data)
-const studentProfileData = {
-  id: "HS001",
-  name: "Nguyễn Văn B",
-  email: "student@gmail.com",
-  phone: "0987654321",
-  gender: "Nam",
-  birthday: "01/01/2007",
-  address: "123 Thủ Đức",
-  placeOfBirth: "TP.HCM",
-  ethnicity: "Kinh",
-  className: "10A1",
-  status: "Đang học",
-};
+import React, { useEffect, useState } from "react";
 
 export default function StudentProfile() {
+  const [student, setStudent] = useState<any>(null);
+  const [studentId, setStudentId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setStudentId(localStorage.getItem("studentId"));
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted || !studentId) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    fetch(`http://localhost:8080/student/profile/${studentId}`)
+      .then(async (res) => {
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+      })
+      .then((data) => setStudent(data))
+      .catch(() => setStudent(null))
+      .finally(() => setLoading(false));
+  }, [studentId, mounted]);
+
+  // Chỉ render khi đã mounted (đã chạy ở client)
+  if (!mounted) return null;
+  if (loading) return <div>Đang tải thông tin...</div>;
+  if (!student) return <div>Không tìm thấy thông tin học sinh.</div>;
+
   return (
     <div>
       {/* Thông tin cá nhân */}
@@ -30,77 +46,77 @@ export default function StudentProfile() {
           <div className="flex flex-col">
             <span className="font-normal text-gray-600">Mã học sinh</span>
             <span className="w-full px-3 py-2 bg-gray-100 rounded border border-gray-200 font-['Inter'] text-base">
-              {studentProfileData.id}
+              {student.id}
             </span>
           </div>
           {/* Họ tên */}
           <div className="flex flex-col">
             <span className="font-normal text-gray-600">Họ tên</span>
             <span className="w-full px-3 py-2 bg-gray-100 rounded border border-gray-200 font-['Inter'] text-base">
-              {studentProfileData.name}
+              {student.account?.fullName}
             </span>
           </div>
           {/* Email */}
           <div className="flex flex-col">
             <span className="font-normal text-gray-600">Email</span>
             <span className="w-full px-3 py-2 bg-gray-100 rounded border border-gray-200 font-['Inter'] text-base">
-              {studentProfileData.email}
+              {student.account?.email}
             </span>
           </div>
           {/* Số điện thoại */}
           <div className="flex flex-col">
             <span className="font-normal text-gray-600">Số điện thoại</span>
             <span className="w-full px-3 py-2 bg-gray-100 rounded border border-gray-200 font-['Inter'] text-base">
-              {studentProfileData.phone}
+              {student.account?.phoneNumber}
             </span>
           </div>
           {/* Giới tính */}
           <div className="flex flex-col">
             <span className="font-normal text-gray-600">Giới tính</span>
             <span className="w-full px-3 py-2 bg-gray-100 rounded border border-gray-200 font-['Inter'] text-base">
-              {studentProfileData.gender}
+              {student.account?.gender}
             </span>
           </div>
           {/* Ngày sinh */}
           <div className="flex flex-col">
             <span className="font-normal text-gray-600">Ngày sinh</span>
             <span className="w-full px-3 py-2 bg-gray-100 rounded border border-gray-200 font-['Inter'] text-base">
-              {studentProfileData.birthday}
+              {student.account?.birthDate}
             </span>
           </div>
           {/* Địa chỉ */}
           <div className="flex flex-col col-span-2">
             <span className="font-normal text-gray-600">Địa chỉ</span>
             <span className="w-full px-3 py-2 bg-gray-100 rounded border border-gray-200 font-['Inter'] text-base">
-              {studentProfileData.address}
+              {student.account?.address}
             </span>
           </div>
           {/* Nơi sinh */}
           <div className="flex flex-col">
             <span className="font-normal text-gray-600">Nơi sinh</span>
             <span className="w-full px-3 py-2 bg-gray-100 rounded border border-gray-200 font-['Inter'] text-base">
-              {studentProfileData.placeOfBirth}
+              {student.birthPlace}
             </span>
           </div>
           {/* Dân tộc */}
           <div className="flex flex-col">
             <span className="font-normal text-gray-600">Dân tộc</span>
             <span className="w-full px-3 py-2 bg-gray-100 rounded border border-gray-200 font-['Inter'] text-base">
-              {studentProfileData.ethnicity}
+              {student.ethnicity}
             </span>
           </div>
           {/* Lớp học */}
           <div className="flex flex-col">
             <span className="font-normal text-gray-600">Lớp học</span>
             <span className="w-full px-3 py-2 bg-gray-100 rounded border border-gray-200 font-['Inter'] text-base">
-              {studentProfileData.className}
+              {student.className}
             </span>
           </div>
           {/* Tình trạng học */}
           <div className="flex flex-col">
             <span className="font-normal text-gray-600">Tình trạng học</span>
             <span className="w-full px-3 py-2 bg-gray-100 rounded border border-gray-200 font-['Inter'] text-base">
-              {studentProfileData.status}
+              {student.status}
             </span>
           </div>
         </div>
