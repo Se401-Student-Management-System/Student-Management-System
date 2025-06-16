@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { DataTable } from "./components/data-table";
 import { columns } from "./components/columns";
 import { TableFilter } from "./components/table-filter";
@@ -17,6 +17,7 @@ interface StudentScore {
   score1Hour1: number | null;
   score1Hour2: number | null;
   finalScore: number | null;
+  averageScore: number | null;
 }
 
 interface ClassInfo {
@@ -29,71 +30,88 @@ interface ClassInfo {
 export default function ClassEnterDetailPage() {
   const router = useRouter();
   const { id } = useParams();
+  const searchParams = useSearchParams();
   const [search, setSearch] = useState<string>("");
   const [error, setError] = useState<string | undefined>(undefined);
   const [students, setStudents] = useState<StudentScore[]>([]);
+  const [originalStudents, setOriginalStudents] = useState<StudentScore[]>([]);
+  const [changedScores, setChangedScores] = useState<Record<string, Partial<StudentScore>>>({});
   const [classInfo, setClassInfo] = useState<ClassInfo | null>(null);
   const [isFormDirty, setIsFormDirty] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Mock dữ liệu
-  const mockStudents: StudentScore[] = [
-    {
-      id: "1",
-      name: "Nguyễn Văn A",
-      score15Min1: 8.0,
-      score15Min2: 7.5,
-      score1Hour1: 8.5,
-      score1Hour2: 9.0,
-      finalScore: 8.7,
-    },
-    {
-      id: "2",
-      name: "Trần Thị B",
-      score15Min1: 7.0,
-      score15Min2: null,
-      score1Hour1: 7.5,
-      score1Hour2: null,
-      finalScore: null,
-    },
-    {
-      id: "3",
-      name: "Lê Văn C",
-      score15Min1: null,
-      score15Min2: null,
-      score1Hour1: null,
-      score1Hour2: null,
-      finalScore: null,
-    },
-  ];
-
-  const mockClassInfo: ClassInfo = {
-    className: "10A1",
-    subject: "Toán",
-    year: "2024",
-    semester: "Học kỳ 1",
-  };
+  // Giả định lấy teacherId từ context hoặc token
+  const teacherId = "GV001";
+  const semester = searchParams.get("semester") || "1"; // Lấy từ query, fallback là 1
+  const academicYear = searchParams.get("year") || "2024-2025"; // Lấy từ query, fallback là 2024-2025
 
   useEffect(() => {
-    // Mock API call: /api/teacher/class/enter/detail/[id]
     const fetchData = async () => {
+      setIsLoading(true);
+      setError(undefined);
       try {
-        // Giả lập gọi API
-        setTimeout(() => {
-          const filteredStudents = mockStudents.filter(
-            (student) =>
-              student.name.toLowerCase().includes(search.toLowerCase()) ||
-              student.id.toLowerCase().includes(search.toLowerCase())
-          );
-          setStudents(filteredStudents);
-          setClassInfo(mockClassInfo); // Giả lập thông tin lớp
-        }, 500);
-      } catch (err) {
-        setError("Không thể tải danh sách học sinh");
-        toast.error("Không thể tải danh sách học sinh");
+        // Phân tách id và giải mã subjectName
+        const [className, encodedSubjectName] = (id as string).split("-");
+        const subjectName = decodeURIComponent(encodedSubjectName);
+
+        const response = await fetch(
+          `http://localhost:8080/teacher/enter-next?teacherId=${teacherId}&className=${encodeURIComponent(
+            className
+          )}&subjectName=${encodeURIComponent(subjectName)}&semester=${semester}&academicYear=${encodeURIComponent(academicYear)}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Không thể tải danh sách điểm");
+        }
+
+        const data = await response.json();
+        if (data.length === 0) {
+          throw new Error("Không có dữ liệu điểm cho lớp/môn học này");
+        }
+
+        // Map dữ liệu từ ScoreInputDetailDTO sang StudentScore
+        const formattedStudents: StudentScore[] = data.map((item: any) => ({
+          id: item.studentId,
+          name: item.fullName,
+          score15Min1: item.score15m1,
+          score15Min2: item.score15m2,
+          score1Hour1: item.score1h1,
+          score1Hour2: item.score1h2,
+          finalScore: item.finalScore,
+          averageScore: item.averageScore,
+        }));
+
+        // Lọc theo tìm kiếm (client-side)
+        const filteredStudents = formattedStudents.filter(
+          (student) =>
+            student.name.toLowerCase().includes(search.toLowerCase()) ||
+            student.id.toLowerCase().includes(search.toLowerCase())
+        );
+
+        setStudents(filteredStudents);
+        setOriginalStudents(formattedStudents);
+        setClassInfo({
+          className,
+          subject: subjectName,
+          year: academicYear,
+          semester: `Học kỳ ${semester}`,
+        });
+      } catch (err: any) {
+        setError(err.message || "Không thể tải danh sách học sinh");
+        toast.error(err.message || "Không thể tải danh sách học sinh");
+      } finally {
+        setIsLoading(false);
       }
     };
+
     fetchData();
-  }, [id, search]);
+  }, [id, search, semester, academicYear]); // Thêm semester và academicYear vào dependencies
 
   // Theo dõi thay đổi form
   useEffect(() => {
@@ -126,8 +144,34 @@ export default function ClassEnterDetailPage() {
 
   const handleSave = async () => {
     try {
-      // Giả lập gọi API: /api/teacher/class/enter/detail/[id]/save
-      console.log("Saving scores for class ID:", id, students);
+      const [className, encodedSubjectName] = (id as string).split("-");
+      const subjectName = decodeURIComponent(encodedSubjectName);
+      const scoreRequest = {
+        subjectId: 1, // Thay bằng logic lấy subjectId từ API/context
+        semester: parseInt(semester), // Sử dụng semester từ query
+        academicYear, // Sử dụng academicYear từ query
+        scores: students.map((student) => ({
+          studentId: student.id,
+          score15m1: student.score15Min1,
+          score15m2: student.score15Min2,
+          score1h1: student.score1Hour1,
+          score1h2: student.score1Hour2,
+          finalScore: student.finalScore,
+        })),
+      };
+
+      const response = await fetch("http://localhost:8080/teacher/enter-scores", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(scoreRequest),
+      });
+
+      if (!response.ok) {
+        throw new Error("Lưu điểm thất bại");
+      }
+
       toast.success("Lưu điểm thành công");
       setIsFormDirty(false);
     } catch (err) {
@@ -139,7 +183,7 @@ export default function ClassEnterDetailPage() {
     if (isFormDirty && !confirm("Bạn có thay đổi chưa lưu. Có muốn tiếp tục rời trang?")) {
       return;
     }
-    router.push("/teacher/class/enter/list");
+    router.push(`/teacher/class/enter/list?semester=${semester}&year=${encodeURIComponent(academicYear)}`);
   };
 
   return (
@@ -155,7 +199,6 @@ export default function ClassEnterDetailPage() {
       )}
 
       <div className="flex justify-between items-center mb-6 bg-white p-4 rounded-lg">
-        {/* Bộ lọc */}
         <form className="flex items-center gap-4">
           <TableFilter
             value={search}
@@ -164,28 +207,25 @@ export default function ClassEnterDetailPage() {
           />
         </form>
 
-        {/* Nút Lưu và Quay lại */}
         <div className="flex gap-4">
-          <Button onClick={handleSave} variant="default">
+          <Button onClick={handleSave} variant="default" disabled={isLoading}>
             <Save className="mr-2 h-4 w-4" />
             Lưu
           </Button>
-          <Button onClick={handleBack} variant="outline">
+          <Button onClick={handleBack} variant="outline" disabled={isLoading}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Quay lại
           </Button>
         </div>
       </div>
 
-      {/* Thông báo lỗi */}
       {error && <p className="text-red-500 mb-6">{error}</p>}
 
-      {/* Bảng dữ liệu */}
       <div className="bg-white p-4 rounded-lg overflow-x-auto">
         <DataTable
           columns={columns(handleScoreChange)}
           data={students}
-          isLoading={false}
+          isLoading={isLoading}
           error={error}
         />
         <DataTablePagination

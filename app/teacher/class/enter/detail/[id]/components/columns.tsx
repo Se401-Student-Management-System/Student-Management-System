@@ -11,6 +11,7 @@ export interface StudentScore {
   score1Hour1: number | null;
   score1Hour2: number | null;
   finalScore: number | null;
+  averageScore: number | null;
 }
 
 export const columns = (
@@ -66,9 +67,7 @@ export const columns = (
         min="0"
         max="10"
         value={row.getValue("score15Min1") ?? ""}
-        onChange={(e) =>
-          onScoreChange(row.getValue("id"), "score15Min1", e.target.value)
-        }
+        onChange={(e) => onScoreChange(row.getValue("id"), "score15Min1", e.target.value)}
         placeholder="Nhập điểm"
         className="w-24"
       />
@@ -93,9 +92,7 @@ export const columns = (
         min="0"
         max="10"
         value={row.getValue("score15Min2") ?? ""}
-        onChange={(e) =>
-          onScoreChange(row.getValue("id"), "score15Min2", e.target.value)
-        }
+        onChange={(e) => onScoreChange(row.getValue("id"), "score15Min2", e.target.value)}
         placeholder="Nhập điểm"
         className="w-24"
       />
@@ -120,9 +117,7 @@ export const columns = (
         min="0"
         max="10"
         value={row.getValue("score1Hour1") ?? ""}
-        onChange={(e) =>
-          onScoreChange(row.getValue("id"), "score1Hour1", e.target.value)
-        }
+        onChange={(e) => onScoreChange(row.getValue("id"), "score1Hour1", e.target.value)}
         placeholder="Nhập điểm"
         className="w-24"
       />
@@ -147,9 +142,7 @@ export const columns = (
         min="0"
         max="10"
         value={row.getValue("score1Hour2") ?? ""}
-        onChange={(e) =>
-          onScoreChange(row.getValue("id"), "score1Hour2", e.target.value)
-        }
+        onChange={(e) => onScoreChange(row.getValue("id"), "score1Hour2", e.target.value)}
         placeholder="Nhập điểm"
         className="w-24"
       />
@@ -174,16 +167,14 @@ export const columns = (
         min="0"
         max="10"
         value={row.getValue("finalScore") ?? ""}
-        onChange={(e) =>
-          onScoreChange(row.getValue("id"), "finalScore", e.target.value)
-        }
+        onChange={(e) => onScoreChange(row.getValue("id"), "finalScore", e.target.value)}
         placeholder="Nhập điểm"
         className="w-24"
       />
     ),
   },
   {
-    id: "averageScore",
+    accessorKey: "averageScore",
     header: ({ column }) => (
       <Button
         className="pl-0"
@@ -194,23 +185,8 @@ export const columns = (
       </Button>
     ),
     cell: ({ row }) => {
-      const scores: (number | null)[] = [
-        row.getValue("score15Min1"),
-        row.getValue("score15Min2"),
-        row.getValue("score1Hour1"),
-        row.getValue("score1Hour2"),
-        row.getValue("finalScore"),
-      ];
-      const validScores = scores.filter((s) => s !== null) as number[];
-      const average =
-        validScores.length > 0
-          ? (
-              (validScores.reduce((sum, s) => sum + s, 0) +
-                (Number(row.getValue("finalScore")) || 0)) /
-              (validScores.length + (row.getValue("finalScore") ? 1 : 0))
-            ).toFixed(1)
-          : "";
-      return <div>{average}</div>;
+      const average = row.getValue("averageScore");
+      return <div>{average ? Number(average).toFixed(1) : ""}</div>;
     },
   },
 ];

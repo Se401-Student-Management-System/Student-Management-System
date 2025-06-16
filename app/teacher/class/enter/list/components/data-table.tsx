@@ -43,8 +43,10 @@ export function DataTable<TData extends object, TValue>({
     columnId: string,
     filterValue: string
   ) => {
-    return Object.values(row.original).some((value) =>
-      String(value).toLowerCase().includes(filterValue.toLowerCase())
+    // Chỉ lọc trên các cột có accessorKey hoặc id được định nghĩa
+    const searchableColumns = ["id", "className", "subject"];
+    return searchableColumns.some((col) =>
+      String(row.getValue(col) ?? "").toLowerCase().includes(filterValue.toLowerCase())
     );
   };
 
@@ -56,6 +58,8 @@ export function DataTable<TData extends object, TValue>({
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     filterFns: { global: globalFilterFn },
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
     state: {
       sorting,

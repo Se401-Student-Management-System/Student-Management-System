@@ -29,87 +29,64 @@ interface ScoreEntry {
 
 export default function ClassEnterListPage() {
   const router = useRouter();
-  const [year, setYear] = useState<string>("2024");
-  const [semester, setSemester] = useState<string>("Học kỳ 1");
+  const [year, setYear] = useState<string>("2024-2025");
+  const [semester, setSemester] = useState<string>("1");
   const [search, setSearch] = useState<string>("");
   const [error, setError] = useState<string | undefined>(undefined);
   const [scores, setScores] = useState<ScoreEntry[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Mock dữ liệu
-  const yearList = ["2024", "2023", "2022", "2021"];
-  const semesterList = ["Học kỳ 1", "Học kỳ 2"];
-  const mockScores: ScoreEntry[] = [
-    {
-      id: "1",
-      className: "10A1",
-      subject: "Toán",
-      score15Min1: "Đã hoàn thành",
-      score15Min2: "Đã hoàn thành",
-      score1Hour1: "Đã hoàn thành",
-      score1Hour2: null,
-      finalScore: null,
-    },
-    {
-      id: "2",
-      className: "10A1",
-      subject: "Văn",
-      score15Min1: "Đã hoàn thành",
-      score15Min2: null,
-      score1Hour1: "Đã hoàn thành",
-      score1Hour2: null,
-      finalScore: null,
-    },
-    {
-      id: "3",
-      className: "10A2",
-      subject: "Toán",
-      score15Min1: null,
-      score15Min2: null,
-      score1Hour1: null,
-      score1Hour2: null,
-      finalScore: null,
-    },
-    {
-      id: "4",
-      className: "11A1",
-      subject: "Anh",
-      score15Min1: "Đã hoàn thành",
-      score15Min2: "Đã hoàn thành",
-      score1Hour1: "Đã hoàn thành",
-      score1Hour2: "Đã hoàn thành",
-      finalScore: "Đã hoàn thành",
-    },
-  ];
+  // Danh sách năm học và học kỳ
+  const yearList = ["2024-2025", "2023-2024"];
+  const semesterList = ["1", "2"];
 
   useEffect(() => {
-    // Mock API call
     const fetchData = async () => {
+      setIsLoading(true);
+      setError(undefined);
       try {
-        // Giả lập gọi API: /api/teacher/class/enter/list?year={year}&semester={semester}&search={search}
-        setTimeout(() => {
-          const filteredScores = mockScores.filter(
-            (score) =>
-              score.className.toLowerCase().includes(search.toLowerCase()) ||
-              score.subject.toLowerCase().includes(search.toLowerCase())
-          );
-          setScores(filteredScores);
-        }, 500);
+        const response = await fetch(
+          `http://localhost:8080/teacher/enter-list?semester=${semester}&year=${year}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        if (!response.ok) {
+          throw new Error("Không thể tải danh sách điểm");
+        }
+        const data = await response.json();
+        const enterList = data.enterList as any[];
+        const formattedScores = enterList.map((item: any) => ({
+          id: `${item.tenLop}-${item.tenMH}`,
+          className: item.tenLop,
+          subject: item.tenMH,
+          score15Min1: item.diem15P_1,
+          score15Min2: item.diem15P_2,
+          score1Hour1: item.diem1Tiet_1,
+          score1Hour2: item.diem1Tiet_2,
+          finalScore: item.diemCK,
+        }));
+        setScores(formattedScores);
       } catch (err) {
         setError("Không thể tải danh sách điểm");
         toast.error("Không thể tải danh sách điểm");
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchData();
   }, [year, semester, search]);
 
   const handleExportExcel = () => {
-    // Giả lập xuất Excel
     console.log("Exporting Excel for scores:", scores);
     toast.success("Đã xuất Excel thành công");
   };
 
   const handleViewDetails = (id: string) => {
-    router.push(`/teacher/class/enter/detail/${id}`);
+    router.push(`/teacher/class/enter/detail/${id}?semester=${semester}&year=${encodeURIComponent(year)}`);
   };
 
   return (
@@ -119,7 +96,6 @@ export default function ClassEnterListPage() {
       </div>
 
       <div className="flex justify-between items-center mb-6 bg-white p-4 rounded-lg">
-        {/* Bộ lọc */}
         <form className="flex items-center gap-4">
           <TableFilter
             value={search}
@@ -145,29 +121,26 @@ export default function ClassEnterListPage() {
             <SelectContent>
               {semesterList.map((s) => (
                 <SelectItem key={s} value={s}>
-                  {s}
+                  {`Học kỳ ${s}`}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </form>
 
-        {/* Nút Xuất Excel */}
         <Button onClick={handleExportExcel} variant="outline">
           <Download className="mr-2 h-4 w-4" />
           Xuất Excel
         </Button>
       </div>
 
-      {/* Thông báo lỗi */}
       {error && <p className="text-red-500 mb-6">{error}</p>}
 
-      {/* Bảng dữ liệu */}
       <div className="bg-white p-4 rounded-lg overflow-x-auto">
         <DataTable
-          columns={columns(handleViewDetails)}
+          columns={columns(handleViewDetails, semester, year)}
           data={scores}
-          isLoading={false}
+          isLoading={isLoading}
           error={error}
         />
         <DataTablePagination
