@@ -1,17 +1,17 @@
 "use client";
-import * as React from "react";
+
+import React from "react";
 import {
   ColumnDef,
-  ColumnFiltersState,
-  SortingState,
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
+  useReactTable,
   getPaginationRowModel,
   getSortedRowModel,
-  useReactTable,
+  getFilteredRowModel,
   Row,
 } from "@tanstack/react-table";
+
 import {
   Table,
   TableBody,
@@ -21,33 +21,19 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-interface DataTableProps<TData extends object, TValue> {
-  columns: ColumnDef<TData, TValue>[];
+interface DataTableProps<TData extends object> {
+  columns: ColumnDef<TData>[];
   data: TData[];
   isLoading: boolean;
-  error: string | undefined;
+  error?: string;
 }
 
-export function DataTable<TData extends object, TValue>({
+export function DataTable<TData extends object>({
   columns,
   data,
   isLoading,
   error,
-}: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-  const [globalFilter, setGlobalFilter] = React.useState("");
-
-  const globalFilterFn = <TData extends object>(
-    row: Row<TData>,
-    columnId: string,
-    filterValue: string
-  ) => {
-    return Object.values(row.original).some((value) =>
-      String(value).toLowerCase().includes(filterValue.toLowerCase())
-    );
-  };
-
+}: DataTableProps<TData>) {
   const table = useReactTable({
     data,
     columns,
@@ -55,71 +41,47 @@ export function DataTable<TData extends object, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    filterFns: { global: globalFilterFn },
-    onGlobalFilterChange: setGlobalFilter,
-    state: {
-      sorting,
-      columnFilters,
-      globalFilter,
-    },
   });
 
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div className="text-red-500">Error: {error}</div>;
+
   return (
-    <div className="w-full">
-      <div className="rounded-md">
-        {isLoading ? (
-          <div className="flex items-center justify-center">Loading...</div>
-        ) : error ? (
-          <div className="flex items-center justify-center">Error: {error}</div>
-        ) : (
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  ))}
-                </TableRow>
+    <div className="rounded border">
+      <Table>
+        <TableHeader>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
+                <TableHead key={header.id}>
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(header.column.columnDef.header, header.getContext())}
+                </TableHead>
               ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center"
-                  >
-                    Không có kết quả.
+            </TableRow>
+          ))}
+        </TableHeader>
+        <TableBody>
+          {table.getRowModel().rows.length ? (
+            table.getRowModel().rows.map((row) => (
+              <TableRow key={row.id}>
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        )}
-      </div>
+                ))}
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={columns.length} className="text-center">
+                Không có kết quả.
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
     </div>
   );
 }

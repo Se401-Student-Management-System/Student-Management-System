@@ -1,5 +1,6 @@
 "use client";
-import React, { useState, useEffect, useCallback } from "react";
+
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { DataTable } from "./components/data-table";
 import { columns } from "./components/columns";
 import { TableFilter } from "./components/table-filter";
@@ -24,49 +25,101 @@ interface Student {
   comments: string;
 }
 
+interface Subject {
+  subjectId: number;
+  subjectName: string;
+}
+
 export default function ClassRatePage() {
-  const [year, setYear] = useState<string>("2024");
+  const [year, setYear] = useState<string>("2024-2025");
   const [semester, setSemester] = useState<string>("Học kỳ 1");
   const [classId, setClassId] = useState<string>("10A1");
   const [search, setSearch] = useState<string>("");
   const [error, setError] = useState<string | undefined>(undefined);
   const [students, setStudents] = useState<Student[]>([]);
   const [isFormDirty, setIsFormDirty] = useState<boolean>(false);
+  const [yearList, setYearList] = useState<string[]>([]);
+  const [classList, setClassList] = useState<string[]>([]);
+  const [subjects, setSubjects] = useState<Subject[]>([
+    { subjectId: 1, subjectName: "Toán" },
+    { subjectId: 2, subjectName: "Văn" },
+    { subjectId: 3, subjectName: "Anh" },
+  ]); // Hard-code tạm thời
 
-  // Mock dữ liệu
-  const yearList = ["2024", "2023", "2022", "2021"];
-  const semesterList = ["Học kỳ 1", "Học kỳ 2"];
-  const classList = ["10A1", "10A2", "11A1", "11A2"];
-  const mockStudents: Student[] = [
-    { id: "1", name: "Nguyễn Văn A", class: "10A1", subject: "Toán", averageScore: 8.5, comments: "" },
-    { id: "1", name: "Nguyễn Văn A", class: "10A1", subject: "Văn", averageScore: 7.8, comments: "" },
-    { id: "1", name: "Nguyễn Văn A", class: "10A1", subject: "Anh", averageScore: 9.0, comments: "" },
-    { id: "2", name: "Trần Thị B", class: "10A1", subject: "Toán", averageScore: 7.5, comments: "" },
-    { id: "2", name: "Trần Thị B", class: "10A1", subject: "Văn", averageScore: 8.0, comments: "" },
-    { id: "2", name: "Trần Thị B", class: "10A1", subject: "Anh", averageScore: 8.2, comments: "" },
-    { id: "3", name: "Lê Văn C", class: "10A2", subject: "Toán", averageScore: 6.5, comments: "" },
-  ];
+  // Fetch data from API
+  const fetchData = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/teacher/class-rate?year=${year}&semester=${semester}&class=${classId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (!response.ok) throw new Error("Không thể tải danh sách học sinh");
+      const data = await response.json();
+      if (data.studentList && Array.isArray(data.studentList)) {
+        setStudents(
+          data.studentList.map((s: any) => ({
+            id: s.studentId,
+            name: s.fullName,
+            class: classId,
+            subject: s.subjectName,
+            averageScore: s.averageScore || 0,
+            comments: s.comments || "",
+          }))
+        );
+      } else {
+        setStudents([]);
+      }
+      setError(undefined);
+    } catch (err: any) {
+      setError("Không thể tải danh sách học sinh");
+      toast.error("Không thể tải danh sách học sinh");
+      setStudents([]);
+    }
+  };
+
+  // Fetch year and class list
+  const fetchOptions = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/teacher/class-rate?year=${year}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (!response.ok) throw new Error("Không thể tải danh sách năm học và lớp");
+      const data = await response.json();
+      setYearList(["2024-2025", "2023-2024"]);
+      setClassList(["10A1", "10A2", "10A3"]);
+    } catch (err: any) {
+      setError("Không thể tải danh sách năm học và lớp");
+      toast.error("Không thể tải danh sách năm học và lớp");
+      setYearList(["2024-2025"]);
+      setClassList(["10A1"]);
+    }
+  };
+
+  // Fetch subjects (giả lập, thay bằng API thực nếu có)
+  const fetchSubjects = async () => {
+    // TODO: Thay bằng API GET /teacher/subjects
+    setSubjects([
+      { subjectId: 1, subjectName: "Toán" },
+      { subjectId: 2, subjectName: "Văn" },
+      { subjectId: 3, subjectName: "Anh" },
+    ]);
+  };
 
   useEffect(() => {
-    // Mock API call
-    const fetchData = async () => {
-      try {
-        // Giả lập gọi API
-        setTimeout(() => {
-          const filteredStudents = mockStudents.filter(
-            (student) =>
-              student.class === classId &&
-              (student.name.toLowerCase().includes(search.toLowerCase()) ||
-                student.subject.toLowerCase().includes(search.toLowerCase()))
-          );
-          setStudents(filteredStudents);
-        }, 500);
-      } catch (err) {
-        setError("Không thể tải danh sách học sinh");
-        toast.error("Không thể tải danh sách học sinh");
-      }
-    };
+    fetchOptions();
     fetchData();
+    fetchSubjects();
   }, [year, semester, classId, search]);
 
   // Theo dõi thay đổi form
@@ -95,19 +148,51 @@ export default function ClassRatePage() {
     []
   );
 
+  // Memoize columns
+  const memoizedColumns = useMemo(
+    () => columns(handleCommentChange),
+    [handleCommentChange]
+  );
+
   const handleSave = async () => {
     try {
-      // Giả lập gọi API
-      console.log("Saving comments:", students);
+      const payload = students
+        .map((student) => ({
+          studentId: student.id,
+          subjectId: subjects.find((s) => s.subjectName === student.subject)?.subjectId,
+          comment: student.comments, // Đổi từ comments sang comment
+          semester: semester === "Học kỳ 1" ? 1 : 2,
+          academicYear: year,
+        }))
+        .filter((item) => item.comment && item.comment.trim() !== "" && item.subjectId); // Loại bỏ comment rỗng hoặc subjectId undefined
+
+      if (payload.length === 0) {
+        toast.error("Không có nhận xét hợp lệ để lưu");
+        return;
+      }
+
+      const response = await fetch("http://localhost:8080/teacher/add-comments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Lưu đánh giá thất bại");
+      }
+
       toast.success("Lưu đánh giá thành công");
       setIsFormDirty(false);
-    } catch (err) {
-      toast.error("Lưu đánh giá thất bại");
+    } catch (err: any) {
+      console.error("Error saving comments:", err);
+      toast.error(err.message || "Lưu đánh giá thất bại");
     }
   };
 
   const handleExportExcel = () => {
-    // Giả lập xuất Excel
     console.log("Exporting Excel for students:", students);
     toast.success("Đã xuất Excel thành công");
   };
@@ -143,7 +228,7 @@ export default function ClassRatePage() {
               <SelectValue placeholder="Chọn học kỳ" />
             </SelectTrigger>
             <SelectContent>
-              {semesterList.map((s) => (
+              {["Học kỳ 1", "Học kỳ 2"].map((s) => (
                 <SelectItem key={s} value={s}>
                   {s}
                 </SelectItem>
@@ -180,10 +265,9 @@ export default function ClassRatePage() {
       {/* Thông báo lỗi */}
       {error && <p className="text-red-500 mb-6">{error}</p>}
 
-      {/* Bảng dữ liệu */}
       <div className="bg-white p-4 rounded-lg overflow-x-auto">
         <DataTable
-          columns={columns(handleCommentChange)}
+          columns={memoizedColumns}
           data={students}
           isLoading={false}
           error={error}
