@@ -14,20 +14,23 @@ export default function ClassRecordDetailPage() {
   const subjectName = searchParams.get("subjectName") || "Chưa chọn";
   const [students, setStudents] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const subjectId = params.id as string;
+  const subjectId = searchParams.get("subjectId");
+  const className = searchParams.get("className") || "Chưa chọn";
 
   useEffect(() => {
     const fetchScores = async () => {
       setLoading(true);
       try {
         const teacherId = localStorage.getItem("userId");
+        const semesterNum = semester === "Học kỳ 1" ? 1 : 2;
         const res = await fetch(
-          `http://localhost:8080/students/by-teacher/${teacherId}`
+          `http://localhost:8080/students/by-class-and-subject?className=${encodeURIComponent(
+            className
+          )}&subjectId=${subjectId}&academicYear=${year}&semester=${semesterNum}`
         );
         const studentsList = await res.json();
 
         const role = localStorage.getItem("role");
-        const semesterNum = semester === "Học kỳ 1" ? 1 : 2;
 
         const studentsWithScores = await Promise.all(
           studentsList.map(async (student: any) => {
@@ -37,10 +40,16 @@ export default function ClassRecordDetailPage() {
               `http://localhost:8080/grades/${sid}?userId=${teacherId}&role=${role}&semester=${semesterNum}&academicYear=${year}`
             );
             const data = await res.json();
-            // Lọc điểm theo subjectId
+            // Lọc điểm đúng môn, năm học, học kỳ
             const scores = Array.isArray(data)
-              ? data.filter((score: any) => String(score.subjectId) === String(subjectId))
+              ? data.filter(
+                  (score: any) =>
+                    String(score.subjectId) === String(subjectId) &&
+                    String(score.academicYear) === String(year) &&
+                    Number(score.semester) === semesterNum
+                )
               : [];
+            if (!scores.length) return null;
             return {
               ...student,
               scores,
@@ -55,11 +64,21 @@ export default function ClassRecordDetailPage() {
       }
     };
     fetchScores();
-  }, [classId, year, semester]);
+  }, [className, subjectId, year, semester]);
 
   const handleExportExcel = () => {
     console.log("Xuất Excel...");
   };
+
+  // Lọc trùng học sinh theo id
+  const uniqueStudents = [];
+  const seenIds = new Set();
+  for (const s of students) {
+    if (!seenIds.has(s.id)) {
+      uniqueStudents.push(s);
+      seenIds.add(s.id);
+    }
+  }
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
@@ -71,7 +90,11 @@ export default function ClassRecordDetailPage() {
         {/* Thông tin báo cáo */}
         <div className="mb-6">
           <h1 className="text-lg font-bold mb-4">Báo cáo học lực lớp</h1>
-          <div className="grid grid-cols-3 gap-8 p-4 border border-gray-200 rounded-lg bg-gray-50">
+          <div className="grid grid-cols-4 gap-8 p-4 border border-gray-200 rounded-lg bg-gray-50">
+            <div className="flex items-center gap-2">
+              <span className="text-[#01B3EF] font-medium">Lớp:</span>
+              <span className="font-semibold">{className}</span>
+            </div>
             <div className="flex items-center gap-2">
               <span className="text-[#01B3EF] font-medium">Năm học:</span>
               <span className="font-semibold">{year}</span>
@@ -103,93 +126,99 @@ export default function ClassRecordDetailPage() {
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full border border-gray-200">
-                <thead className="bg-gray-100">
+                <thead className="bg-primary">
                   <tr>
-                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 border-r border-gray-200">
+                    {/* <th className="px-4 py-2 text-left text-sm font-medium text-white border-r border-gray-200">
                       Lớp
-                    </th>
-                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 border-r border-gray-200">
+                    </th> */}
+                    <th className="px-4 py-2 text-left text-sm font-medium text-white border-r border-gray-200">
                       Mã học sinh
                     </th>
-                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 border-r border-gray-200">
+                    <th className="px-4 py-2 text-left text-sm font-medium text-white border-r border-gray-200">
                       Họ tên học sinh
                     </th>
-                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 border-r border-gray-200">
+                    <th className="px-4 py-2 text-left text-sm font-medium text-white border-r border-gray-200">
                       15 phút 1
                     </th>
-                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 border-r border-gray-200">
+                    <th className="px-4 py-2 text-left text-sm font-medium text-white border-r border-gray-200">
                       15 phút 2
                     </th>
-                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 border-r border-gray-200">
+                    <th className="px-4 py-2 text-left text-sm font-medium text-white border-r border-gray-200">
                       1 tiết 1
                     </th>
-                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 border-r border-gray-200">
+                    <th className="px-4 py-2 text-left text-sm font-medium text-white border-r border-gray-200">
                       1 tiết 2
                     </th>
-                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
+                    <th className="px-4 py-2 text-left text-sm font-medium text-white">
                       Cuối kỳ
+                    </th>
+                    <th className="px-4 py-2 text-left text-sm font-medium text-white">
+                      Nhận xét
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {students.map((s, sIdx) =>
-                    Array.isArray(s.scores) && s.scores.length > 0 ? (
-                      (() => {
-                        const uniqueScores = [];
-                        const seen = new Set();
-                        for (const score of s.scores) {
-                          const key = `${score.subjectId}-${score.semester}-${score.academicYear}`;
-                          if (!seen.has(key)) {
-                            uniqueScores.push(score);
-                            seen.add(key);
-                          }
-                        }
-                        return uniqueScores.map((score: any, idx: number) => (
-                          <tr key={`${s.id}-${idx}`} className="border-t border-gray-200">
-                            <td className="px-4 py-2 text-sm text-gray-900 border-r border-gray-200">
-                              {s.className || s.clazz?.className || ""}
-                            </td>
-                            <td className="px-4 py-2 text-sm text-gray-900 border-r border-gray-200">
-                              {s.id}
-                            </td>
-                            <td className="px-4 py-2 text-sm text-gray-900 border-r border-gray-200">
-                              {s.fullName}
-                            </td>
-                            <td className="px-4 py-2 text-sm text-gray-900 border-r border-gray-200">
-                              {score.score15m1}
-                            </td>
-                            <td className="px-4 py-2 text-sm text-gray-900 border-r border-gray-200">
-                              {score.score15m2}
-                            </td>
-                            <td className="px-4 py-2 text-sm text-gray-900 border-r border-gray-200">
-                              {score.score1h1}
-                            </td>
-                            <td className="px-4 py-2 text-sm text-gray-900 border-r border-gray-200">
-                              {score.score1h2}
-                            </td>
-                            <td className="px-4 py-2 text-sm text-gray-900">
-                              {score.finalScore}
-                            </td>
-                          </tr>
-                        ));
-                      })()
-                    ) : (
-                      <tr key={`no-score-${s.id}-${sIdx}`} className="border-t border-gray-200">
-                        <td className="px-4 py-2 text-sm text-gray-900 border-r border-gray-200">
+                  {uniqueStudents.map((s, sIdx) => {
+                    const score =
+                      Array.isArray(s.scores) && s.scores.length > 0
+                        ? s.scores.at(-1)
+                        : null;
+                    if (!score) {
+                      return (
+                        <tr
+                          key={`no-score-${s.id}-${sIdx}`}
+                          className="border-t border-gray-200"
+                        >
+                          {/* <td className="px-4 py-2 text-sm text-gray-900 border-r border-gray-200">
+                            {s.className || s.clazz?.className || ""}
+                          </td> */}
+                          <td className="px-4 py-2 text-sm text-gray-900 border-r border-gray-200">
+                            {s.id}
+                          </td>
+                          <td className="px-4 py-2 text-sm text-gray-900 border-r border-gray-200">
+                            {s.fullName}
+                          </td>
+                          <td
+                            colSpan={5}
+                            className="px-4 py-2 text-sm text-gray-900 text-center"
+                          >
+                            Không có dữ liệu
+                          </td>
+                        </tr>
+                      );
+                    }
+                    return (
+                      <tr key={`${s.id}`} className="border-t border-gray-200">
+                        {/* <td className="px-4 py-2 text-sm text-gray-900 border-r border-gray-200">
                           {s.className || s.clazz?.className || ""}
-                        </td>
+                        </td> */}
                         <td className="px-4 py-2 text-sm text-gray-900 border-r border-gray-200">
                           {s.id}
                         </td>
                         <td className="px-4 py-2 text-sm text-gray-900 border-r border-gray-200">
                           {s.fullName}
                         </td>
-                        <td colSpan={5} className="px-4 py-2 text-sm text-gray-900 text-center">
-                          Không có dữ liệu
+                        <td className="px-4 py-2 text-sm text-gray-900 border-r border-gray-200">
+                          {score.score15m1}
+                        </td>
+                        <td className="px-4 py-2 text-sm text-gray-900 border-r border-gray-200">
+                          {score.score15m2}
+                        </td>
+                        <td className="px-4 py-2 text-sm text-gray-900 border-r border-gray-200">
+                          {score.score1h1}
+                        </td>
+                        <td className="px-4 py-2 text-sm text-gray-900 border-r border-gray-200">
+                          {score.score1h2}
+                        </td>
+                        <td className="px-4 py-2 text-sm text-gray-900">
+                          {score.finalScore}
+                        </td>
+                        <td className="px-4 py-2 text-sm text-gray-900">
+                          {score.comments || "Chưa có nhận xét"}
                         </td>
                       </tr>
-                    )
-                  )}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

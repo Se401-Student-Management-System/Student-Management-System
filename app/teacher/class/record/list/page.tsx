@@ -120,7 +120,7 @@ export default function ClassRecordListPage() {
       ) : (
         <div className="bg-white p-4 rounded-lg overflow-x-auto">
           <DataTable
-            columns={columns({ year, semester })}
+            columns={columns({ year, semester }) as import("@tanstack/react-table").ColumnDef<SubjectReport, unknown>[]}
             data={paginatedData}
             isLoading={loading}
             error={error ?? undefined}
