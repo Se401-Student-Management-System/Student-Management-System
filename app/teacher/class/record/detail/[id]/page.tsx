@@ -1,83 +1,65 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
-import { DataTable } from "./components/data-table";
-import { columns } from "./components/columns";
-import { Button } from "@/components/ui/button";
+
+import React, { useEffect, useState } from "react";
+import { useParams, useSearchParams } from "next/navigation";
 import { Download } from "lucide-react";
-import { toast } from "sonner";
-
-interface Student {
-  studentId: string;
-  fullName: string;
-  score: number;
-}
-
-interface ReportDetail {
-  year: string;
-  semester: string;
-  className: string;
-  subject: string;
-  exam: string;
-  excellentStudents: Student[];
-  goodStudents: Student[];
-  averageStudents: Student[];
-  weakStudents: Student[];
-}
+import { Button } from "@/components/ui/button";
 
 export default function ClassRecordDetailPage() {
   const params = useParams();
-  const id = params.id as string;
-  const [report, setReport] = useState<ReportDetail | null>(null);
-  const [error, setError] = useState<string | undefined>(undefined);
-
-  // Mock dữ liệu
-  const mockReport: ReportDetail = {
-    year: "2024",
-    semester: "Học kỳ 1",
-    className: "10A1",
-    subject: "Toán",
-    exam: "Cuối kỳ",
-    excellentStudents: [
-      { studentId: "HS001", fullName: "Nguyễn Văn A", score: 8.5 },
-      { studentId: "HS002", fullName: "Trần Thị B", score: 9.0 },
-    ],
-    goodStudents: [
-      { studentId: "HS003", fullName: "Lê Văn C", score: 7.0 },
-      { studentId: "HS004", fullName: "Phạm Thị D", score: 7.5 },
-    ],
-    averageStudents: [
-      { studentId: "HS005", fullName: "Hoàng Văn E", score: 6.0 },
-    ],
-    weakStudents: [
-      { studentId: "HS006", fullName: "Ngô Thị F", score: 4.5 },
-    ],
-  };
+  const searchParams = useSearchParams();
+  const classId = params.id as string;
+  const year = searchParams.get("year") || "2024-2025";
+  const semester = searchParams.get("semester") || "Học kỳ 1";
+  const subjectName = searchParams.get("subjectName") || "Chưa chọn";
+  const [students, setStudents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const subjectId = params.id as string;
 
   useEffect(() => {
-    // Mock API call: /api/teacher/class/record/detail/[id]
-    const fetchData = async () => {
+    const fetchScores = async () => {
+      setLoading(true);
       try {
-        setTimeout(() => {
-          setReport(mockReport);
-        }, 500);
-      } catch (err) {
-        setError("Không thể tải chi tiết báo cáo");
-        toast.error("Không thể tải chi tiết báo cáo");
+        const teacherId = localStorage.getItem("userId");
+        const res = await fetch(
+          `http://localhost:8080/students/by-teacher/${teacherId}`
+        );
+        const studentsList = await res.json();
+
+        const role = localStorage.getItem("role");
+        const semesterNum = semester === "Học kỳ 1" ? 1 : 2;
+
+        const studentsWithScores = await Promise.all(
+          studentsList.map(async (student: any) => {
+            const sid = student.id;
+            if (!sid) return null;
+            const res = await fetch(
+              `http://localhost:8080/grades/${sid}?userId=${teacherId}&role=${role}&semester=${semesterNum}&academicYear=${year}`
+            );
+            const data = await res.json();
+            // Lọc điểm theo subjectId
+            const scores = Array.isArray(data)
+              ? data.filter((score: any) => String(score.subjectId) === String(subjectId))
+              : [];
+            return {
+              ...student,
+              scores,
+            };
+          })
+        );
+        setStudents(studentsWithScores.filter(Boolean));
+      } catch (e) {
+        console.error("Lỗi khi tải dữ liệu:", e);
+      } finally {
+        setLoading(false);
       }
     };
-    fetchData();
-  }, [id]);
+    fetchScores();
+  }, [classId, year, semester]);
 
   const handleExportExcel = () => {
-    // Giả lập xuất Excel
-    console.log("Exporting Excel for report:", report);
-    toast.success("Đã xuất Excel thành công");
+    console.log("Xuất Excel...");
   };
-
-  if (!report) {
-    return <div className="p-6">Đang tải...</div>;
-  }
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
@@ -89,30 +71,18 @@ export default function ClassRecordDetailPage() {
         {/* Thông tin báo cáo */}
         <div className="mb-6">
           <h1 className="text-lg font-bold mb-4">Báo cáo học lực lớp</h1>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <span className="text-[#01B3EF] font-medium">Năm học:</span>
-                <span className="font-semibold">{report.year}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[#01B3EF] font-medium">Học kỳ:</span>
-                <span className="font-semibold">{report.semester}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[#01B3EF] font-medium">Lớp:</span>
-                <span className="font-semibold">{report.className}</span>
-              </div>
+          <div className="grid grid-cols-3 gap-8 p-4 border border-gray-200 rounded-lg bg-gray-50">
+            <div className="flex items-center gap-2">
+              <span className="text-[#01B3EF] font-medium">Năm học:</span>
+              <span className="font-semibold">{year}</span>
             </div>
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <span className="text-[#01B3EF] font-medium">Môn học:</span>
-                <span className="font-semibold">{report.subject}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[#01B3EF] font-medium">Bài kiểm tra:</span>
-                <span className="font-semibold">{report.exam}</span>
-              </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[#01B3EF] font-medium">Học kỳ:</span>
+              <span className="font-semibold">{semester}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[#01B3EF] font-medium">Môn học:</span>
+              <span className="font-semibold">{subjectName}</span>
             </div>
           </div>
         </div>
@@ -125,48 +95,105 @@ export default function ClassRecordDetailPage() {
           </Button>
         </div>
 
-        {/* Bảng Giỏi */}
+        {/* Bảng điểm học sinh */}
         <div className="mb-8">
-          <h1 className="text-lg font-bold mb-4">Loại Giỏi</h1>
-          <DataTable
-            columns={columns}
-            data={report.excellentStudents}
-            isLoading={false}
-            error={error}
-          />
-        </div>
-
-        {/* Bảng Khá */}
-        <div className="mb-8">
-          <h1 className="text-lg font-bold mb-4">Loại Khá</h1>
-          <DataTable
-            columns={columns}
-            data={report.goodStudents}
-            isLoading={false}
-            error={error}
-          />
-        </div>
-
-        {/* Bảng Trung bình */}
-        <div className="mb-8">
-          <h1 className="text-lg font-bold mb-4">Loại Trung Bình</h1>
-          <DataTable
-            columns={columns}
-            data={report.averageStudents}
-            isLoading={false}
-            error={error}
-          />
-        </div>
-
-        {/* Bảng Yếu */}
-        <div>
-          <h1 className="text-lg font-bold mb-4">Loại Yếu</h1>
-          <DataTable
-            columns={columns}
-            data={report.weakStudents}
-            isLoading={false}
-            error={error}
-          />
+          <h1 className="text-lg font-bold mb-4">Bảng điểm học sinh</h1>
+          {loading ? (
+            <div>Đang tải...</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full border border-gray-200">
+                <thead className="bg-gray-100">
+                  <tr>
+                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 border-r border-gray-200">
+                      Lớp
+                    </th>
+                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 border-r border-gray-200">
+                      Mã học sinh
+                    </th>
+                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 border-r border-gray-200">
+                      Họ tên học sinh
+                    </th>
+                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 border-r border-gray-200">
+                      15 phút 1
+                    </th>
+                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 border-r border-gray-200">
+                      15 phút 2
+                    </th>
+                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 border-r border-gray-200">
+                      1 tiết 1
+                    </th>
+                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 border-r border-gray-200">
+                      1 tiết 2
+                    </th>
+                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
+                      Cuối kỳ
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {students.map((s, sIdx) =>
+                    Array.isArray(s.scores) && s.scores.length > 0 ? (
+                      (() => {
+                        const uniqueScores = [];
+                        const seen = new Set();
+                        for (const score of s.scores) {
+                          const key = `${score.subjectId}-${score.semester}-${score.academicYear}`;
+                          if (!seen.has(key)) {
+                            uniqueScores.push(score);
+                            seen.add(key);
+                          }
+                        }
+                        return uniqueScores.map((score: any, idx: number) => (
+                          <tr key={`${s.id}-${idx}`} className="border-t border-gray-200">
+                            <td className="px-4 py-2 text-sm text-gray-900 border-r border-gray-200">
+                              {s.className || s.clazz?.className || ""}
+                            </td>
+                            <td className="px-4 py-2 text-sm text-gray-900 border-r border-gray-200">
+                              {s.id}
+                            </td>
+                            <td className="px-4 py-2 text-sm text-gray-900 border-r border-gray-200">
+                              {s.fullName}
+                            </td>
+                            <td className="px-4 py-2 text-sm text-gray-900 border-r border-gray-200">
+                              {score.score15m1}
+                            </td>
+                            <td className="px-4 py-2 text-sm text-gray-900 border-r border-gray-200">
+                              {score.score15m2}
+                            </td>
+                            <td className="px-4 py-2 text-sm text-gray-900 border-r border-gray-200">
+                              {score.score1h1}
+                            </td>
+                            <td className="px-4 py-2 text-sm text-gray-900 border-r border-gray-200">
+                              {score.score1h2}
+                            </td>
+                            <td className="px-4 py-2 text-sm text-gray-900">
+                              {score.finalScore}
+                            </td>
+                          </tr>
+                        ));
+                      })()
+                    ) : (
+                      <tr key={`no-score-${s.id}-${sIdx}`} className="border-t border-gray-200">
+                        <td className="px-4 py-2 text-sm text-gray-900 border-r border-gray-200">
+                          {s.className || s.clazz?.className || ""}
+                        </td>
+                        <td className="px-4 py-2 text-sm text-gray-900 border-r border-gray-200">
+                          {s.id}
+                        </td>
+                        <td className="px-4 py-2 text-sm text-gray-900 border-r border-gray-200">
+                          {s.fullName}
+                        </td>
+                        <td colSpan={5} className="px-4 py-2 text-sm text-gray-900 text-center">
+                          Không có dữ liệu
+                        </td>
+                      </tr>
+                    )
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
     </div>

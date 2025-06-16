@@ -1,9 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { DataTable } from "./components/data-table";
-import { columns } from "./components/columns";
-import { TableFilter } from "./components/table-filter";
-import { DataTablePagination } from "./components/data-pagination";
+import React, { useEffect, useState } from "react";
 import {
   Select,
   SelectContent,
@@ -11,179 +7,127 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
-import { toast } from "sonner";
+import { DataTable } from "./components/data-table";
+import { columns } from "./components/columns";
 
-interface AcademicReport {
-  id: string;
-  className: string;
-  subject: string;
-  excellent: number; // Tỷ lệ % Giỏi
-  good: number; // Tỷ lệ % Khá
-  average: number; // Tỷ lệ % Trung bình
-  weak: number; // Tỷ lệ % Yếu
-  averageScore: number; // Điểm trung bình
+interface SubjectReport {
+  id: string; // subjectId
+  subjectName: string;
 }
 
 export default function ClassRecordListPage() {
-  const [search, setSearch] = useState<string>("");
-  const [year, setYear] = useState<string>("2024");
-  const [semester, setSemester] = useState<string>("Học kỳ 1");
-  const [exam, setExam] = useState<string>("Cuối kỳ");
-  const [error, setError] = useState<string | undefined>(undefined);
-  const [reports, setReports] = useState<AcademicReport[]>([]);
+  const [subjects, setSubjects] = useState<SubjectReport[]>([]);
+  const [year, setYear] = useState("2024-2025");
+  const [semester, setSemester] = useState("Học kỳ 1");
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
 
-  // Mock dữ liệu
-  const yearList = ["2024", "2023", "2022", "2021"];
+  const yearList = ["2024-2025", "2023-2024"];
   const semesterList = ["Học kỳ 1", "Học kỳ 2"];
-  const examList = ["15 Phút lần 1", "15 Phút lần 2", "1 Tiết lần 1", "1 Tiết lần 2", "Cuối kỳ"];
-  const mockReports: AcademicReport[] = [
-    {
-      id: "1",
-      className: "10A1",
-      subject: "Toán",
-      excellent: 20,
-      good: 40,
-      average: 30,
-      weak: 10,
-      averageScore: 7.5,
-    },
-    {
-      id: "2",
-      className: "10A1",
-      subject: "Văn",
-      excellent: 15,
-      good: 35,
-      average: 40,
-      weak: 10,
-      averageScore: 7.0,
-    },
-    {
-      id: "3",
-      className: "10A2",
-      subject: "Toán",
-      excellent: 10,
-      good: 30,
-      average: 50,
-      weak: 10,
-      averageScore: 6.5,
-    },
-    {
-      id: "4",
-      className: "11A1",
-      subject: "Anh",
-      excellent: 25,
-      good: 45,
-      average: 20,
-      weak: 10,
-      averageScore: 7.8,
-    },
-  ];
 
   useEffect(() => {
-    // Mock API call: /api/teacher/class/record/list?year={year}&semester={semester}&exam={exam}&search={search}
-    const fetchData = async () => {
+    const fetchSubjects = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        setTimeout(() => {
-          const filteredReports = mockReports.filter(
-            (report) =>
-              report.className.toLowerCase().includes(search.toLowerCase()) ||
-              report.subject.toLowerCase().includes(search.toLowerCase())
-          );
-          setReports(filteredReports);
-        }, 500);
-      } catch (err) {
-        setError("Không thể tải báo cáo học lực");
-        toast.error("Không thể tải báo cáo học lực");
+        const teacherId = localStorage.getItem("userId");
+        const semesterNum = semester === "Học kỳ 1" ? 1 : 2;
+        const res = await fetch(
+          `http://localhost:8080/teacher/subjects?teacherId=${teacherId}&year=${year}&semester=${semesterNum}`
+        );
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setSubjects(data);
+        } else {
+          setSubjects([]);
+          setError("Dữ liệu trả về không hợp lệ.");
+        }
+      } catch (e) {
+        setSubjects([]);
+        setError("Không thể tải danh sách môn học.");
+      } finally {
+        setLoading(false);
       }
     };
-    fetchData();
-  }, [year, semester, exam, search]);
+    fetchSubjects();
+  }, [year, semester]);
 
-  const handleExportExcel = () => {
-    // Giả lập xuất Excel
-    console.log("Exporting Excel for reports:", reports);
-    toast.success("Đã xuất Excel thành công");
-  };
+  // Filter and paginate
+  const filteredSubjects = subjects.filter(
+    (subject) =>
+      subject.subjectName.toLowerCase().includes(search.toLowerCase())
+  );
+  const pageCount = Math.ceil(filteredSubjects.length / pageSize) || 1;
+  const paginatedData = filteredSubjects.slice(
+    pageIndex * pageSize,
+    pageIndex * pageSize + pageSize
+  );
+
+  useEffect(() => {
+    setPageIndex(0);
+  }, [search, pageSize]);
 
   return (
     <div className="p-6">
       <div className="text-black text-base font-medium mb-6">
         Học tập / Lớp học / Báo cáo học lực lớp
       </div>
-
-      <div className="flex justify-between items-center mb-6 bg-white p-4 rounded-lg">
-        {/* Bộ lọc */}
-        <form className="flex items-center gap-4">
-          <TableFilter
+      <div className="mb-6 mt-4 flex flex-wrap items-end gap-x-6 gap-y-4">
+        <div>
+          {/* <label className="block text-sm font-medium">Tìm kiếm môn học</label> */}
+          <input
+            type="text"
             value={search}
-            onChange={(value) => setSearch(value)}
-            placeholder="Tìm kiếm lớp hoặc môn học..."
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Tìm kiếm môn học..."
+            className="border p-2 rounded w-60"
           />
-          <Select value={year} onValueChange={setYear}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Chọn năm học" />
-            </SelectTrigger>
-            <SelectContent>
-              {yearList.map((y) => (
-                <SelectItem key={y} value={y}>
-                  {y}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={semester} onValueChange={setSemester}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Chọn học kỳ" />
-            </SelectTrigger>
-            <SelectContent>
-              {semesterList.map((s) => (
-                <SelectItem key={s} value={s}>
-                  {s}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={exam} onValueChange={setExam}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Bài kiểm tra" />
-            </SelectTrigger>
-            <SelectContent>
-              {examList.map((e) => (
-                <SelectItem key={e} value={e}>
-                  {e}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </form>
-
-        {/* Nút Xuất Excel */}
-        <Button onClick={handleExportExcel} variant="outline">
-          <Download className="mr-2 h-4 w-4" />
-          Xuất Excel
-        </Button>
+        </div>
+        <Select value={year} onValueChange={setYear}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Chọn năm học" />
+          </SelectTrigger>
+          <SelectContent>
+            {yearList.map((y) => (
+              <SelectItem key={y} value={y}>
+                {y}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={semester} onValueChange={setSemester}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Chọn học kỳ" />
+          </SelectTrigger>
+          <SelectContent>
+            {semesterList.map((s) => (
+              <SelectItem key={s} value={s}>
+                {s}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
-
-      {/* Thông báo lỗi */}
-      {error && <p className="text-red-500 mb-6">{error}</p>}
-
-      {/* Bảng dữ liệu */}
-      <div className="bg-white p-4 rounded-lg overflow-x-auto">
-        <DataTable
-          columns={columns}
-          data={reports}
-          isLoading={false}
-          error={error}
-        />
-        <DataTablePagination
-          pageCount={Math.ceil(reports.length / 10)}
-          pageIndex={0}
-          pageSize={10}
-          onPageChange={() => {}}
-        />
-      </div>
+      {loading ? (
+        <div>Đang tải...</div>
+      ) : error ? (
+        <div className="text-red-500">{error}</div>
+      ) : subjects.length === 0 ? (
+        <div>Không có môn học nào.</div>
+      ) : (
+        <div className="bg-white p-4 rounded-lg overflow-x-auto">
+          <DataTable
+            columns={columns({ year, semester })}
+            data={paginatedData}
+            isLoading={loading}
+            error={error ?? undefined}
+          />
+          
+        </div>
+      )}
     </div>
   );
 }

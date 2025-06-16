@@ -15,9 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import Link from "next/link";
 
-// Schema validate
 const loginSchema = z.object({
   username: z.string(),
   password: z.string().min(6, "Mật khẩu phải ít nhất 6 ký tự"),
@@ -26,6 +24,7 @@ const loginSchema = z.object({
 export default function PageLogin() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [role, setRole] = useState("Student");
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -44,7 +43,7 @@ export default function PageLogin() {
         body: JSON.stringify({
           username: data.username,
           password: data.password,
-          role: "Student",
+          role: role,
         }),
       });
       if (!res.ok) throw new Error(await res.text());
@@ -58,9 +57,22 @@ export default function PageLogin() {
       if (result.studentId) {
         localStorage.setItem("studentId", result.studentId);
       }
+      if (result.teacherId) {
+        localStorage.setItem("teacherId", result.teacherId);
+      }
+      if (result.cashierId) {
+        localStorage.setItem("cashierId", result.cashierId);
+      }
+      if (result.supervisorId) {
+        localStorage.setItem("supervisorId", result.supervisorId);
+      }
+
       localStorage.setItem("account", JSON.stringify(result.account));
       toast.success("Đăng nhập thành công!");
-      router.push("/student/score");
+      if (result.role === "Teacher") router.push("/teacher/class/record/list");
+      else if (result.role === "Student") router.push("/student/score");
+      else if (result.role === "Cashier") router.push("/cashier/payment");
+      else if (result.role === "Supervisor") router.push("/supervisor/category");
     } catch (err) {
       toast.error("Đăng nhập thất bại: " + err);
     } finally {
@@ -136,6 +148,17 @@ export default function PageLogin() {
                     </FormItem>
                   )}
                 />
+                {/* Dropdown */}
+                <select
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  className="p-2.5 rounded-[5px] border border-primary cursor-pointer"
+                >
+                  <option value="Student">Học sinh</option>
+                  <option value="Teacher">Giáo viên</option>
+                  <option value="Cashier">Thu ngân</option>
+                  <option value="Supervisor">Giám thị</option>
+                </select>
 
                 <Button
                   type="submit"

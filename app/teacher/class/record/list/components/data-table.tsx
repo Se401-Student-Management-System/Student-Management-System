@@ -1,4 +1,5 @@
 "use client";
+
 import * as React from "react";
 import {
   ColumnDef,
@@ -10,6 +11,7 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
+  filterFns,
   Row,
 } from "@tanstack/react-table";
 import {
@@ -20,6 +22,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { CirclePlus, PlusCircle, Search } from "lucide-react";
+import { useRouter, usePathname } from "next/navigation";
+import { DataTablePagination } from "./data-pagination";
+import { TableFilter } from "./table-filter";
+import Link from "next/link";
 
 interface DataTableProps<TData extends object, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -35,9 +43,13 @@ export function DataTable<TData extends object, TValue>({
   error,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-  const [globalFilter, setGlobalFilter] = React.useState("");
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    []
+  );
+  const router = useRouter();
+  const path = usePathname();
 
+  const [globalFilter, setGlobalFilter] = React.useState("");
   const globalFilterFn = <TData extends object>(
     row: Row<TData>,
     columnId: string,
@@ -65,7 +77,17 @@ export function DataTable<TData extends object, TValue>({
   });
 
   return (
-    <div className="w-full">
+    <div>
+      {/* <div className="w-full bg-white flex items-center justify-between border border-white rounded-[10px] mb-[20px] mt-[10px] h-[60px]">
+        <div className="flex justify-end items-center h-full">
+          <div className="relative h-full flex items-center">
+            <TableFilter table={table} />
+            <Search className="absolute right-2 top-1/3 transform -translate-y-1 text-black" />
+          </div>
+        </div>
+
+        <div className="flex justify-start"></div>
+      </div> */}
       <div className="rounded-md">
         {isLoading ? (
           <div className="flex items-center justify-center">Loading...</div>
@@ -76,16 +98,18 @@ export function DataTable<TData extends object, TValue>({
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  ))}
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead key={header.id}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableHead>
+                    );
+                  })}
                 </TableRow>
               ))}
             </TableHeader>
@@ -112,7 +136,7 @@ export function DataTable<TData extends object, TValue>({
                     colSpan={columns.length}
                     className="h-24 text-center"
                   >
-                    Không có kết quả.
+                    No results.
                   </TableCell>
                 </TableRow>
               )}
@@ -120,6 +144,9 @@ export function DataTable<TData extends object, TValue>({
           </Table>
         )}
       </div>
+      {table.getRowModel().rows?.length > 0 && (
+        <DataTablePagination table={table} />
+      )}
     </div>
   );
 }

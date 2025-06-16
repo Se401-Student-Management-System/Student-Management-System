@@ -1,6 +1,12 @@
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  DoubleArrowLeftIcon,
+  DoubleArrowRightIcon,
+} from "@radix-ui/react-icons";
+import { Table } from "@tanstack/react-table";
+import { useState, useEffect } from "react";
 
-"use client";
-import * as React from "react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -9,106 +15,110 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-} from "lucide-react";
 
-interface DataTablePaginationProps {
-  pageCount: number;
-  pageIndex: number;
-  pageSize: number;
-  onPageChange: (pageIndex: number) => void;
-  onPageSizeChange?: (pageSize: number) => void;
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+
+interface DataTablePaginationProps<TData> {
+  table: Table<TData>;
 }
 
-export function DataTablePagination({
-  pageCount,
-  pageIndex,
-  pageSize,
-  onPageChange,
-  onPageSizeChange,
-}: DataTablePaginationProps) {
-  const [currentPage, setCurrentPage] = React.useState(pageIndex);
+export function DataTablePagination<TData>({
+  table,
+}: DataTablePaginationProps<TData>) {
+  const pageCount = table.getPageCount();
+  const [currentPage, setCurrentPage] = useState(
+    table.getState().pagination.pageIndex
+  );
 
-  React.useEffect(() => {
-    setCurrentPage(pageIndex);
-  }, [pageIndex]);
+  useEffect(() => {
+    setCurrentPage(table.getState().pagination.pageIndex);
+  }, [table.getState().pagination.pageIndex]);
 
-  const handlePageChange = (newPage: number) => {
-    if (newPage >= 0 && newPage < pageCount) {
-      setCurrentPage(newPage);
-      onPageChange(newPage);
-    }
-  };
+  const totalRecords = table.getPrePaginationRowModel().rows.length;
+  const currentRecords = table.getState().pagination.pageSize;
 
   return (
-    <div className="flex items-center justify-between px-2 py-4">
-      <div className="flex-1 text-sm text-muted-foreground">
-        Tổng số {pageCount * pageSize} bản ghi
-      </div>
-      <div className="flex items-center space-x-6 lg:space-x-8">
+    <div className="flex flex-row-reverse items-end justify-between pt-[10px]">
+      <div className="flex items-center gap-[50px]">
         <div className="flex items-center space-x-2">
-          <p className="text-sm font-medium">Số bản ghi mỗi trang</p>
+          <p className="text-sm font-medium">Rows per page</p>
           <Select
-            value={`${pageSize}`}
+            value={`${table.getState().pagination.pageSize}`}
             onValueChange={(value) => {
-              if (onPageSizeChange) {
-                onPageSizeChange(Number(value));
-              }
+              table.setPageSize(Number(value));
             }}
           >
-            <SelectTrigger className="h-8 w-[70px]">
-              <SelectValue placeholder={pageSize} />
+            <SelectTrigger className="h-[32px] w-[64px]">
+              <SelectValue placeholder={table.getState().pagination.pageSize} />
             </SelectTrigger>
             <SelectContent side="top">
-              {[5, 10, 20].map((size) => (
-                <SelectItem key={size} value={`${size}`}>
-                  {size}
+              {[5, 10, 20].map((pageSize) => (
+                <SelectItem key={pageSize} value={`${pageSize}`}>
+                  {pageSize}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
-        <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-          Trang {pageIndex + 1} / {pageCount}
+        <div className="flex items-center gap-1">
+          <Button
+            variant="outline"
+            className="size-[32px] p-0"
+            onClick={() => table.setPageIndex(0)}
+            disabled={!table.getCanPreviousPage()}
+          >
+            <DoubleArrowLeftIcon className="size-[16px]" />
+          </Button>
+          <Button
+            variant="outline"
+            className="size-[32px] p-0"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            <ChevronLeftIcon className="size-[16px]" />
+          </Button>
+          <ToggleGroup
+            type="single"
+            value={currentPage.toString()}
+            onValueChange={(value) => {
+              const pageIndex = Number(value);
+              table.setPageIndex(pageIndex);
+              setCurrentPage(pageIndex);
+            }}
+          >
+            {Array.from({ length: pageCount }).map((_, index) => (
+              <ToggleGroupItem
+                key={index}
+                className="size-[32px] p-0"
+                variant="outline"
+                value={index.toString()}
+              >
+                {index + 1}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+          <Button
+            variant="outline"
+            className="size-[32px] p-0"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            <ChevronRightIcon className="size-[16px]" />
+          </Button>
+          <Button
+            variant="outline"
+            className="size-[32px] p-0"
+            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+            disabled={!table.getCanNextPage()}
+          >
+            <DoubleArrowRightIcon className="size-[16px]" />
+          </Button>
         </div>
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            className="h-8 w-8 p-0"
-            onClick={() => handlePageChange(0)}
-            disabled={pageIndex === 0}
-          >
-            <ChevronsLeft className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            className="h-8 w-8 p-0"
-            onClick={() => handlePageChange(pageIndex - 1)}
-            disabled={pageIndex === 0}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            className="h-8 w-8 p-0"
-            onClick={() => handlePageChange(pageIndex + 1)}
-            disabled={pageIndex >= pageCount - 1}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            className="h-8 w-8 p-0"
-            onClick={() => handlePageChange(pageCount - 1)}
-            disabled={pageIndex >= pageCount - 1}
-          >
-            <ChevronsRight className="h-4 w-4" />
-          </Button>
-        </div>
+      </div>
+
+      {/* Thông tin phân trang và số bản ghi */}
+      <div className="flex items-center space-x-2">
+        <p className="text-[16px]">Total: {totalRecords} payments</p>
       </div>
     </div>
   );
