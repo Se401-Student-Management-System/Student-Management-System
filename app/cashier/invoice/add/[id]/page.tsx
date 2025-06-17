@@ -23,85 +23,113 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
-  BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+} from "@/components/ui/breadcrumb";
 
 const formSchema = z.object({
-    student_id: z.string(),
-    totalPayment: z
-      .string()
-      .min(1, "Số tiền đóng không được để trống") 
-      .refine((val) => Number(val) > 0, {
+  student_id: z.string(),
+  totalPayment: z
+    .string()
+    .min(1, "Số tiền đóng không được để trống")
+    .refine((val) => Number(val) > 0, {
       message: "Số tiền phải lớn hơn 0",
     }),
-    // totalFee: z.string(),
-    // debtAmount: z.string(),
-})
+});
 
 export default function AddInvoice() {
   const router = useRouter();
-  const { id } = useParams();
+  const { id } = useParams() as { id: string };
   const [loading, setLoading] = useState(true);
+  const [studentInfo, setStudentInfo] = useState<{
+    id: string;
+    name: string;
+    class: string;
+    year: string;
+    totalFee: string;
+    status: string;
+    paidAmount: string;
+    outstandingAmount: string;
+  } | null>(null);
 
-  const [studentInfo] = useState({
-    id: "HS001",
-    name: "Nguyễn Văn A",
-    class: "10A1",
-    year: "2024-2025",
-    totalFee: "1000000",
-    status: "Còn nợ"
-  });
-  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      student_id: studentInfo.id,
-        totalPayment: "",
-        // totalFee: studentInfo.totalFee,
-        // debtAmount: "",
+      student_id: "",
+      totalPayment: "",
     },
   });
 
-  // useEffect(() => {
-  //   const subscription = form.watch((values) => {
-  //     const totalFee = Number(values.totalFee);
-  //     const totalPayment = Number(values.totalPayment);
-  
-  //     if (!isNaN(totalFee) && !isNaN(totalPayment)) {
-  //       const debt = Math.max(totalFee - totalPayment, 0);
-  //       form.setValue("debtAmount", debt.toString());
-  //     }
-  //   });
-  
-  //   return () => subscription.unsubscribe();
-  // }, [form]);
+  useEffect(() => {
+    const fetchInvoiceDetail = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(
+          `http://localhost:8080/cashier/invoices/${id}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        if (!response.ok) throw new Error("Không thể tải thông tin hóa đơn");
+        const data = await response.json();
+        if (data) {
+          setStudentInfo({
+            id: data.studentId || "",
+            name: data.studentName || "",
+            class: data.className || "",
+            year: data.academicYear || "",
+            totalFee: data.totalFee?.toString() || "0",
+            status: data.status || "",
+            paidAmount: data.paidAmount?.toString() || "0",
+            outstandingAmount: data.outstandingAmount?.toString() || "0",
+          });
+          form.setValue("student_id", data.studentId || "");
+        } else {
+          setStudentInfo(null);
+        }
+      } catch (err) {
+        toast.error("Lỗi khi tải thông tin hóa đơn");
+        setStudentInfo(null);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // function formatCurrency(value: string | number) {
-  //   const number = typeof value === "string" ? Number(value) : value;
-  //   return number.toLocaleString("vi-VN") + " đ";
-  // }
-
-  // function unformatCurrency(value: string) {
-  //   return value.replace(/[^0-9]/g, ""); // chỉ giữ số
-  // }
+    fetchInvoiceDetail();
+  }, [id, form]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const res = await fetch("/api/invoice", {
-      method: "POST",
-      body: JSON.stringify(values),
-      headers: { "Content-Type": "application/json" },
-    });
+    try {
+      const response = await fetch(`http://localhost:8080/cashier/add-payment`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          cashierId: "CS001", // Thay bằng ID thu ngân thực tế nếu có
+          invoiceId: id,
+          amount: Number(values.totalPayment),
+        }),
+      });
 
-    if (res.ok) {
-      toast.success("Thêm thanh toán thành công");
-      router.push("/cashier/invoice");
-    } else {
-      toast.error("Có lỗi xảy ra");
+      const result = await response.text();
+      if (response.ok) {
+        toast.success("Thêm thanh toán thành công");
+        router.push("/cashier/invoice");
+      } else {
+        toast.error(`Thêm thanh toán thất bại: ${result}`);
+      }
+    } catch (err) {
+      toast.error("Có lỗi xảy ra khi thêm thanh toán");
     }
   }
 
-  return(
+  if (loading) return <div>Đang tải...</div>;
+  if (!studentInfo) return <div>Không tìm thấy thông tin hóa đơn</div>;
+
+  return (
     <div>
       <div className="relative justify-start text-black text-base font-normal font-['Inter']">
         <Breadcrumb>
@@ -112,7 +140,7 @@ export default function AddInvoice() {
             <BreadcrumbSeparator />
             <BreadcrumbItem>
               <BreadcrumbLink href={`/cashier/invoice/add/${id}`}>Thêm thanh toán</BreadcrumbLink>
-            </BreadcrumbItem>   
+            </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
       </div>
@@ -159,6 +187,18 @@ export default function AddInvoice() {
             </div>
             <div>
               <FormItem className="w-full flex flex-col">
+                <FormLabel className="font-normal">Số tiền đã thanh toán</FormLabel>
+                <Input value={studentInfo.paidAmount} readOnly />
+              </FormItem>
+            </div>
+            <div>
+              <FormItem className="w-full flex flex-col">
+                <FormLabel className="font-normal">Số tiền còn nợ</FormLabel>
+                <Input value={studentInfo.outstandingAmount} readOnly />
+              </FormItem>
+            </div>
+            <div>
+              <FormItem className="w-full flex flex-col">
                 <FormLabel className="font-normal">Trạng thái</FormLabel>
                 <Input value={studentInfo.status} readOnly />
               </FormItem>
@@ -172,34 +212,17 @@ export default function AddInvoice() {
               <FormItem className="w-full flex flex-col">
                 <FormLabel>Số tiền đóng</FormLabel>
                 <FormControl>
-                  <Input 
-                  // value={formatCurrency(field.value || 0)}
-                  // onChange={(e) => {
-                  //   const raw = unformatCurrency(e.target.value);
-                  //   form.setValue("totalPayment", raw);
-                  // }}
+                  <Input
                     type="number"
                     min={1}
-                    placeholder="Nhập số tiền" 
-                    {...field} 
+                    placeholder="Nhập số tiền"
+                    {...field}
                   />
                 </FormControl>
                 <FormMessage className="text-red-600 font-semibold" />
               </FormItem>
             )}
           />
-          {/* <FormField
-            control={form.control}
-            name="debtAmount"
-            render={({ field }) => (
-              <FormItem className="w-full flex flex-col">
-                <FormLabel className="font-normal">Số tiền còn nợ</FormLabel>
-                <FormControl>
-                  <Input value={formatCurrency(field.value || 0)} readOnly />
-                </FormControl>
-              </FormItem>
-            )}
-          /> */}
           <div className="w-full self-stretch inline-flex flex-col justify-start items-end gap-5 mt-[15px]">
             <div className="inline-flex justify-start items-start gap-[29px]">
               <div className="relative">

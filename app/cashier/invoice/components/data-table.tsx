@@ -23,16 +23,23 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Search } from "lucide-react";
-import { useRouter, usePathname } from "next/navigation";
 import { DataTablePagination } from "./data-pagination";
 import { TableFilter } from "./table-filter";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface DataTableProps<TData extends object, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   isLoading: boolean;
   error: string | undefined;
+  onStatusChange?: (status: string | undefined) => void;
+  onAcademicYearChange?: (year: string) => void;
 }
 
 export function DataTable<TData extends object, TValue>({
@@ -40,15 +47,13 @@ export function DataTable<TData extends object, TValue>({
   data,
   isLoading,
   error,
+  onStatusChange,
+  onAcademicYearChange,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  );
-  const router = useRouter();
-  const path = usePathname();
-
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = React.useState("");
+
   const globalFilterFn = <TData extends object>(
     row: Row<TData>,
     columnId: string,
@@ -66,12 +71,12 @@ export function DataTable<TData extends object, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    filterFns: { global: globalFilterFn }, // Dùng bộ lọc toàn cục
-    onGlobalFilterChange: setGlobalFilter, // Cập nhật giá trị tìm kiếm
+    filterFns: { global: globalFilterFn },
+    onGlobalFilterChange: setGlobalFilter,
     state: {
       sorting,
       columnFilters,
-      globalFilter, // Thêm state này vào bảng
+      globalFilter,
     },
   });
 
@@ -83,22 +88,32 @@ export function DataTable<TData extends object, TValue>({
             <TableFilter table={table} />
             <Search className="absolute right-2 top-1/3 transform -translate-y-1 text-black" />
           </div>
-          <Select>
+          <Select
+            onValueChange={(value) =>
+              onStatusChange?.(
+                value === "paid" ? "Đã thanh toán" :
+                value === "unpaid" ? "Chưa thanh toán" :
+                value === "processing" ? "Thanh toán 1 phần" : undefined
+              )
+            }
+          >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Trạng thái" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="paid">Đã thanh toán</SelectItem>
-              <SelectItem value="inpaid">Chưa thanh toán</SelectItem>
+              <SelectItem value="unpaid">Chưa thanh toán</SelectItem>
               <SelectItem value="processing">Thanh toán 1 phần</SelectItem>
             </SelectContent>
           </Select>
-          <Select>
+          <Select
+            onValueChange={(value) => onAcademicYearChange?.(value)}
+            defaultValue="2024-2025"
+          >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Năm học" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="2022-2023">2022-2023</SelectItem>
               <SelectItem value="2023-2024">2023-2024</SelectItem>
               <SelectItem value="2024-2025">2024-2025</SelectItem>
             </SelectContent>
@@ -115,18 +130,16 @@ export function DataTable<TData extends object, TValue>({
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    return (
-                      <TableHead key={header.id}>
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
-                      </TableHead>
-                    );
-                  })}
+                  {headerGroup.headers.map((header) => (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
+                  ))}
                 </TableRow>
               ))}
             </TableHeader>
