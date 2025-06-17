@@ -9,9 +9,6 @@ import { Layers, Pencil, Trash } from "lucide-react";
 export interface Class {
   id: string;
   className: string;
-  teacherId: string;
-  teacherName: string;
-  studentCount: string;
   action: string;
 }
 
@@ -45,51 +42,6 @@ export const columns: ColumnDef<Class>[] = [
       );
     },
     cell: ({ row }) => <div>{row.getValue("className")}</div>,
-  },
-  {
-    accessorKey: "teacherId",
-    header: ({ column }) => {
-      return (
-        <Button
-          className="pl-0"
-          variant="ghost"
-          style={{ backgroundColor: "transparent" }}
-        >
-          MSGV
-        </Button>
-      );
-    },
-    cell: ({ row }) => <div>{row.getValue("teacherId")}</div>,
-  },
-  {
-    accessorKey: "teacherName",
-    header: ({ column }) => {
-      return (
-        <Button
-          className="pl-0"
-          variant="ghost"
-          style={{ backgroundColor: "transparent" }}
-        >
-          Tên giáo viên
-        </Button>
-      );
-    },
-    cell: ({ row }) => <div>{row.getValue("teacherName")}</div>,
-  },
-  {
-    accessorKey: "studentCount",
-    header: ({ column }) => {
-      return (
-        <Button
-          className="pl-0"
-          variant="ghost"
-          style={{ backgroundColor: "transparent" }}
-        >
-          Sĩ số
-        </Button>
-      );
-    },
-    cell: ({ row }) => <div>{row.getValue("studentCount")}</div>,
   },
   {
     id: "action",
