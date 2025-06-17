@@ -196,14 +196,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               </AccordionContent>{" "}
               <AccordionContent className="w-full">
                 <Link
-                  href="/director/student/perserved"
-                  className="block w-full py-2 px-2 text-black hover:bg-gray-200"
-                >
-                  Bảo lưu
-                </Link>
-              </AccordionContent>{" "}
-              <AccordionContent className="w-full">
-                <Link
                   href="/director/student/record"
                   className="block w-full py-2 px-2 text-black hover:bg-gray-200"
                 >

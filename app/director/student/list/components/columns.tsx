@@ -9,15 +9,18 @@ import { Badge } from "@/components/ui/badge";
 
 export interface Student {
   id: string;
-  studentName: string;
+  username: string;
+  fullName: string;
   gender: string;
   email: string;
-  phone: string;
-  class: string;
-  nation: string;
+  phoneNumber: string;
+  ethnicity: string;
   birthDate: string;
+  birthPlace: string;
   address: string;
   status: string;
+  className: string;
+  academicYear: string;
   action: string;
 }
 
@@ -38,7 +41,22 @@ export const columns: ColumnDef<Student>[] = [
     cell: ({ row }) => <div>{row.getValue("id")}</div>,
   },
   {
-    accessorKey: "studentName",
+    accessorKey: "username",
+    header: ({ column }) => {
+      return (
+        <Button
+          className="pl-0"
+          variant="ghost"
+          style={{ backgroundColor: "transparent" }}
+        >
+          Username
+        </Button>
+      );
+    },
+    cell: ({ row }) => <div>{row.getValue("username")}</div>,
+  },
+  {
+    accessorKey: "fullName",
     header: ({ column }) => {
       return (
         <Button
@@ -50,7 +68,7 @@ export const columns: ColumnDef<Student>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => <div>{row.getValue("studentName")}</div>,
+    cell: ({ row }) => <div>{row.getValue("fullName")}</div>,
   },
   {
     accessorKey: "gender",
@@ -83,7 +101,7 @@ export const columns: ColumnDef<Student>[] = [
     cell: ({ row }) => <div>{row.getValue("email")}</div>,
   },
   {
-    accessorKey: "phone",
+    accessorKey: "phoneNumber",
     header: ({ column }) => {
       return (
         <Button
@@ -95,10 +113,10 @@ export const columns: ColumnDef<Student>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => <div>{row.getValue("phone")}</div>,
+    cell: ({ row }) => <div>{row.getValue("phoneNumber")}</div>,
   },
   {
-    accessorKey: "class",
+    accessorKey: "className",
     header: ({ column }) => {
       return (
         <Button
@@ -110,10 +128,10 @@ export const columns: ColumnDef<Student>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => <div>{row.getValue("class")}</div>,
+    cell: ({ row }) => <div>{row.getValue("className")}</div>,
   },
   {
-    accessorKey: "nation",
+    accessorKey: "ethnicity",
     header: ({ column }) => {
       return (
         <Button
@@ -125,7 +143,7 @@ export const columns: ColumnDef<Student>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => <div>{row.getValue("nation")}</div>,
+    cell: ({ row }) => <div>{row.getValue("ethnicity")}</div>,
   },
   {
     accessorKey: "birthDate",
@@ -151,11 +169,26 @@ export const columns: ColumnDef<Student>[] = [
           variant="ghost"
           style={{ backgroundColor: "transparent" }}
         >
-          Nơi sinh
+          Địa chỉ
         </Button>
       );
     },
     cell: ({ row }) => <div>{row.getValue("address")}</div>,
+  },
+  {
+    accessorKey: "birthPlace",
+    header: ({ column }) => {
+      return (
+        <Button
+          className="pl-0"
+          variant="ghost"
+          style={{ backgroundColor: "transparent" }}
+        >
+          Nơi sinh
+        </Button>
+      );
+    },
+    cell: ({ row }) => <div>{row.getValue("birthPlace")}</div>,
   },
   {
     accessorKey: "status",
@@ -174,12 +207,14 @@ export const columns: ColumnDef<Student>[] = [
       const status = row.getValue("status");
 
       return (
-        <Badge status={status as "inactive" | "active" | "onHold" | undefined}>
-          {status === "active"
+        <Badge status={status as "INACTIVE" | "ACTIVE" | "WARNING" | undefined}>
+          {status === "ACTIVE"
             ? "Đang học"
-            : status === "onHold"
-            ? "Đang bảo lưu"
-            : "Hết hạn bảo lưu"}
+            : status === "PENDING"
+            ? "Mới tiếp nhận"
+            : status === "WARNING"
+            ? "Bị cảnh cáo"
+            : "Nghỉ học"}
         </Badge>
       );
     },
