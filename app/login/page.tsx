@@ -69,6 +69,9 @@ export default function PageLogin() {
 
       localStorage.setItem("account", JSON.stringify(result.account));
       toast.success("Đăng nhập thành công!");
+      if (result.role === "Teacher" && result.userId) {
+        localStorage.setItem("teacherId", result.userId);
+      }
       if (result.role === "Teacher") router.push("/teacher/class/record/list");
       else if (result.role === "Student") router.push("/student/score");
       else if (result.role === "Cashier") router.push("/cashier/payment");

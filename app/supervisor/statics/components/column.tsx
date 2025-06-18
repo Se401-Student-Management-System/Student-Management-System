@@ -17,15 +17,6 @@ export interface Fault {
 
 export const columns: ColumnDef<Fault>[] = [
   {
-    accessorKey: "id",
-    header: () => (
-      <Button className="pl-0" variant="ghost" style={{ backgroundColor: "transparent" }}>
-        ID
-      </Button>
-    ),
-    cell: ({ row }) => <div>{row.getValue("id")}</div>,
-  },
-  {
     accessorKey: "studentId",
     header: () => (
       <Button className="pl-0" variant="ghost" style={{ backgroundColor: "transparent" }}>
@@ -53,22 +44,31 @@ export const columns: ColumnDef<Fault>[] = [
     cell: ({ row }) => <div>{row.getValue("className")}</div>,
   },
   {
-    accessorKey: "faultDetail",
+    accessorKey: "violationCount",
     header: () => (
       <Button className="pl-0" variant="ghost" style={{ backgroundColor: "transparent" }}>
-        Lỗi vi phạm
+        Số lần vi phạm
       </Button>
     ),
-    cell: ({ row }) => <div>{row.getValue("faultDetail")}</div>,
+    cell: ({ row }) => <div>{row.getValue("violationCount")}</div>,
   },
   {
-    accessorKey: "minusPoint",
+    accessorKey: "behaviorScore",
     header: () => (
       <Button className="pl-0" variant="ghost" style={{ backgroundColor: "transparent" }}>
-        Điểm trừ
+        Điểm hạnh kiểm
       </Button>
     ),
-    cell: ({ row }) => <div>{row.getValue("minusPoint")}</div>,
+    cell: ({ row }) => <div>{row.getValue("behaviorScore")}</div>,
+  },
+   {
+    accessorKey: "status",
+    header: () => (
+      <Button className="pl-0" variant="ghost" style={{ backgroundColor: "transparent" }}>
+        Tình trạng
+      </Button>
+    ),
+    cell: ({ row }) => <div>{row.getValue("status")}</div>,
   },
   {
     id: "action",

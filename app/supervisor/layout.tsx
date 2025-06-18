@@ -113,6 +113,26 @@ export default function CashierLayout ({ children }: CashierLayoutProps) {
                                 Danh mục vi phạm
                                 </Link>
                             </AccordionContent>{" "}
+                            <div className="w-full h-[30px] justify-between items-center inline-flex">
+                                <AccordionTrigger>
+                                    <div data-svg-wrapper className="relative">
+                                        <NotebookPen color="#E14177" />
+                                    </div>
+                                    Thống kê
+                                </AccordionTrigger>
+                            </div>
+                             <AccordionContent className="w-full">
+                                <Link
+                                href="/supervisor/statics"
+                                className={`block w-full py-2 px-2 text-black hover:bg-gray-200 ${
+                                    pathname === "/supervisor/statics"
+                                    ? "bg-primary text-white font-bold"
+                                    : "text-black"
+                                }`} 
+                                >
+                                Thống kê hạnh kiểm
+                                </Link>
+                            </AccordionContent>{" "}
                         </AccordionItem>
                     </Accordion>
                 </div>

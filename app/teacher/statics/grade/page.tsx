@@ -1,4 +1,3 @@
-
 "use client";
 import React, { useState, useEffect } from "react";
 import {
@@ -8,8 +7,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import StatCard from "./components/StatCard"; // Cập nhật đường dẫn import
-import { Users, TrendingUp, TrendingDown } from "lucide-react";
+import StatCard from "./components/StatCard";
+import { Users } from "lucide-react";
 import {
   PieChart,
   Pie,
@@ -22,6 +21,7 @@ import {
   Tooltip,
   CartesianGrid,
 } from "recharts";
+import axios from "axios";
 
 interface GradeStats {
   excellentCount: number;
@@ -37,7 +37,6 @@ interface GradeStats {
 export default function GradeStaticsPage() {
   const [year, setYear] = useState<string>("2024");
   const [semester, setSemester] = useState<string>("Học kỳ 1");
-  const [error, setError] = useState<string | undefined>(undefined);
   const [stats, setStats] = useState<GradeStats>({
     excellentCount: 50,
     goodCount: 120,
@@ -48,17 +47,14 @@ export default function GradeStaticsPage() {
     averageChange: 3.1,
     weakChange: 1.8,
   });
+  const [error, setError] = useState<string | undefined>(undefined);
 
-  // Mock danh sách năm học
   const yearList = ["2024", "2023", "2022", "2021"];
-
-  // Tạo văn bản so sánh
   const previousYear = (parseInt(year) - 1).toString();
   const comparisonText = semester
     ? `so với ${semester.toLowerCase()} năm ${previousYear}`
     : `so với năm ${previousYear}`;
 
-  // Dữ liệu cho biểu đồ tròn
   const pieData = [
     { name: "Giỏi", value: stats.excellentCount },
     { name: "Khá", value: stats.goodCount },
@@ -66,7 +62,6 @@ export default function GradeStaticsPage() {
     { name: "Yếu", value: stats.weakCount },
   ];
 
-  // Dữ liệu cho biểu đồ cột
   const barData = [
     { name: "Giỏi", count: stats.excellentCount },
     { name: "Khá", count: stats.goodCount },
@@ -74,31 +69,35 @@ export default function GradeStaticsPage() {
     { name: "Yếu", count: stats.weakCount },
   ];
 
-  // Màu sắc cho biểu đồ
   const COLORS = ["#01B3EF", "#f59e0b", "#16a34a", "#dc2626"];
 
+  const fetchGradeStatistics = async () => {
+    setError(undefined);
+    const teacherId = localStorage.getItem("teacherId");
+    if (!teacherId) {
+      setError("Không tìm thấy mã giáo viên (teacherId). Vui lòng đăng nhập lại.");
+      return;
+    }
+    try {
+      const response = await axios.get(
+        "http://localhost:8080/api/teacher/statics/grade",
+        {
+          params: {
+            teacherId: teacherId,
+            academicYear: year,
+            semester: semester === "Học kỳ 1" ? 1 : 2,
+          },
+        }
+      );
+      setStats(response.data);
+    } catch (err) {
+      setError("Không thể tải dữ liệu thống kê");
+    }
+  };
+
   useEffect(() => {
-    // Mock API call
-    const fetchData = async () => {
-      try {
-        // Giả lập gọi API: /api/teacher/statics/grade?year={year}&semester={semester}
-        setTimeout(() => {
-          setStats({
-            excellentCount: 50,
-            goodCount: 120,
-            averageCount: 200,
-            weakCount: 30,
-            excellentChange: 5.2,
-            goodChange: -2.3,
-            averageChange: 3.1,
-            weakChange: 1.8,
-          });
-        }, 500);
-      } catch (err) {
-        setError("Không thể tải dữ liệu thống kê");
-      }
-    };
-    fetchData();
+    fetchGradeStatistics();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [year, semester]);
 
   return (
