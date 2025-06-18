@@ -31,69 +31,26 @@ interface Subject {
 }
 
 export default function ClassRatePage() {
-  const semesterList = ["Học kỳ 1", "Học kỳ 2"];
-  const [year, setYear] = useState<string>("");
-  const [semester, setSemester] = useState<string>("");
-  const [classId, setClassId] = useState<string>("");
+  const [year, setYear] = useState<string>("2024-2025");
+  const [semester, setSemester] = useState<string>("Học kỳ 1");
+  const [classId, setClassId] = useState<string>("10A1");
   const [search, setSearch] = useState<string>("");
   const [error, setError] = useState<string | undefined>(undefined);
   const [students, setStudents] = useState<Student[]>([]);
   const [isFormDirty, setIsFormDirty] = useState<boolean>(false);
   const [yearList, setYearList] = useState<string[]>([]);
   const [classList, setClassList] = useState<string[]>([]);
-  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [subjects, setSubjects] = useState<Subject[]>([
+    { subjectId: 1, subjectName: "Toán" },
+    { subjectId: 2, subjectName: "Văn" },
+    { subjectId: 3, subjectName: "Anh" },
+  ]);
 
-  // Fetch danh sách năm học từ API
-  const fetchYearList = async () => {
-    try {
-      const res = await fetch("http://localhost:8080/teacher/years");
-      if (!res.ok) throw new Error("Không thể tải danh sách năm học");
-      const data = await res.json();
-      setYearList(data);
-      if (data.length > 0 && !year) setYear(data[0]);
-    } catch (err: any) {
-      setError("Không thể tải danh sách năm học");
-      setYearList([]);
-    }
-  };
-
-  // Fetch danh sách lớp học từ API (không cần truyền year)
-  const fetchClassList = async () => {
-    try {
-      const res = await fetch("http://localhost:8080/teacher/classes");
-      if (!res.ok) throw new Error("Không thể tải danh sách lớp học");
-      const data = await res.json();
-      setClassList(data);
-      if (data.length > 0 && !classId) setClassId(data[0]);
-    } catch (err: any) {
-      setError("Không thể tải danh sách lớp học");
-      setClassList([]);
-    }
-  };
-
-  // Fetch danh sách môn học từ API thực tế
-  const fetchSubjects = async () => {
-    try {
-      const teacherId = "GV001";
-      if (!year || !semester) return;
-      const res = await fetch(
-        `http://localhost:8080/teacher/subjects?teacherId=${teacherId}&year=${encodeURIComponent(year)}&semester=${semester === "Học kỳ 1" ? 1 : 2}`
-      );
-      if (!res.ok) throw new Error("Không thể tải danh sách môn học");
-      const data = await res.json();
-      setSubjects(data);
-    } catch (err: any) {
-      setError("Không thể tải danh sách môn học");
-      setSubjects([]);
-    }
-  };
-
-  // Fetch danh sách học sinh đánh giá
+  // Fetch data from API
   const fetchData = async () => {
     try {
-      if (!year || !semester || !classId) return;
       const response = await fetch(
-        `http://localhost:8080/teacher/class-rate?year=${encodeURIComponent(year)}&semester=${encodeURIComponent(semester)}&class=${encodeURIComponent(classId)}`,
+        `http://localhost:8080/teacher/class-rate?year=${year}&semester=${semester}&class=${classId}`,
         {
           method: "GET",
           headers: {
@@ -103,17 +60,12 @@ export default function ClassRatePage() {
       );
       if (!response.ok) throw new Error("Không thể tải danh sách học sinh");
       const data = await response.json();
-
-      if (data.selectedYear) setYear(data.selectedYear);
-      if (data.selectedSemester) setSemester(data.selectedSemester);
-      if (data.selectedClass) setClassId(data.selectedClass);
-
       if (data.studentList && Array.isArray(data.studentList)) {
         setStudents(
           data.studentList.map((s: any) => ({
             id: s.studentId,
             name: s.fullName,
-            class: data.selectedClass || classId,
+            class: classId,
             subject: s.subjectName,
             averageScore: s.averageScore || 0,
             comments: s.comments || "",
@@ -130,27 +82,44 @@ export default function ClassRatePage() {
     }
   };
 
-  // Lấy danh sách năm học và lớp học khi load trang
-  useEffect(() => {
-    fetchYearList();
-    fetchClassList();
-  }, []);
-
-  // Lấy danh sách môn học khi năm học hoặc học kỳ thay đổi
-  useEffect(() => {
-    if (year && semester) {
-      fetchSubjects();
+  // Fetch year and class list
+  const fetchOptions = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/teacher/class-rate?year=${year}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (!response.ok) throw new Error("Không thể tải danh sách năm học và lớp");
+      const data = await response.json();
+      setYearList(["2024-2025", "2023-2024"]);
+      setClassList(["10A1", "10A2", "10A3"]);
+    } catch (err: any) {
+      setError("Không thể tải danh sách năm học và lớp");
+      toast.error("Không thể tải danh sách năm học và lớp");
+      setYearList(["2024-2025"]);
+      setClassList(["10A1"]);
     }
-  }, [year, semester]);
+  };
 
-  // Lấy danh sách học sinh khi các filter thay đổi
+  const fetchSubjects = async () => {
+    setSubjects([
+      { subjectId: 1, subjectName: "Toán" },
+      { subjectId: 2, subjectName: "Văn" },
+      { subjectId: 3, subjectName: "Anh" },
+    ]);
+  };
+
   useEffect(() => {
-    if (year && semester && classId) {
-      fetchData();
-    }
+    fetchOptions();
+    fetchData();
+    fetchSubjects();
   }, [year, semester, classId, search]);
 
-  // Theo dõi thay     đổi form
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
       if (isFormDirty) {
@@ -176,7 +145,6 @@ export default function ClassRatePage() {
     []
   );
 
-  // Memoize columns
   const memoizedColumns = useMemo(
     () => columns(handleCommentChange),
     [handleCommentChange]
@@ -188,11 +156,11 @@ export default function ClassRatePage() {
         .map((student) => ({
           studentId: student.id,
           subjectId: subjects.find((s) => s.subjectName === student.subject)?.subjectId,
-          comment: student.comments,
+          comment: student.comments, // Đổi từ comments sang comment
           semester: semester === "Học kỳ 1" ? 1 : 2,
           academicYear: year,
         }))
-        .filter((item) => item.comment && item.comment.trim() !== "" && item.subjectId);
+        .filter((item) => item.comment && item.comment.trim() !== "" && item.subjectId); // Loại bỏ comment rỗng hoặc subjectId undefined
 
       if (payload.length === 0) {
         toast.error("Không có nhận xét hợp lệ để lưu");
@@ -239,7 +207,6 @@ export default function ClassRatePage() {
             onChange={(value) => setSearch(value)}
             placeholder="Tìm kiếm học sinh hoặc môn học..."
           />
-          {/* Dropdown chọn năm học */}
           <Select value={year} onValueChange={setYear}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Chọn năm học" />
@@ -252,20 +219,18 @@ export default function ClassRatePage() {
               ))}
             </SelectContent>
           </Select>
-          {/* Dropdown chọn học kỳ */}
           <Select value={semester} onValueChange={setSemester}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Chọn học kỳ" />
             </SelectTrigger>
             <SelectContent>
-              {semesterList.map((s) => (
+              {["Học kỳ 1", "Học kỳ 2"].map((s) => (
                 <SelectItem key={s} value={s}>
                   {s}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          {/* Dropdown chọn lớp học */}
           <Select value={classId} onValueChange={setClassId}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Chọn lớp học" />
