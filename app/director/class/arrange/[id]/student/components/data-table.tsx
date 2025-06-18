@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { CirclePlus, PlusCircle, Search } from "lucide-react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useParams } from "next/navigation";
 import { DataTablePagination } from "./data-pagination";
 import { TableFilter } from "./table-filter";
 import Link from "next/link";
@@ -42,6 +42,8 @@ export function DataTable<TData extends object, TValue>({
   isLoading,
   error,
 }: DataTableProps<TData, TValue>) {
+  const params = useParams();
+  const classId = params?.id;
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -97,7 +99,9 @@ export function DataTable<TData extends object, TValue>({
           <div className="relative">
             <PlusCircle className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white" />
             <Button className="pl-12 h-[40px]">
-              <Link href="#">Thêm học sinh</Link>
+              <Link href={`/director/class/arrange/${classId}/student/add`}>
+                Thêm học sinh
+              </Link>
             </Button>{" "}
           </div>
         </div>

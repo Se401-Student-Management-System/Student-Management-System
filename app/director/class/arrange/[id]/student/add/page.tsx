@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { LogOut, Save } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import {
   Form,
@@ -16,7 +17,6 @@ import {
 } from "@/components/ui/form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { min } from "date-fns";
 import {
   Select,
   SelectContent,
@@ -27,22 +27,47 @@ import {
 
 const formSchema = z.object({
   className: z.string(),
-  year: z.string(),
-  studentName: z.string(),
+  academicYear: z.string(),
+  studentId: z.string(),
 });
 
 export default function addStudentArrange() {
+  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       className: "",
-      year: "",
-      studentName: "",
+      academicYear: "",
+      studentId: "",
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      const response = await fetch(
+        "http://localhost:8080/students/assign-class",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(values),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to assign student to class");
+      }
+
+      const data = await response.json();
+      console.log("Success:", data);
+
+      // Quay lại trang trước đó
+      router.back();
+    } catch (error) {
+      console.error("Error:", error);
+      // Optional: show notification
+    }
   }
 
   return (
@@ -62,7 +87,7 @@ export default function addStudentArrange() {
             <div className="w-[500px] inline-flex flex-col justify-start items-start gap-5">
               <FormField
                 control={form.control}
-                name="year"
+                name="academicYear"
                 render={({ field }) => (
                   <FormItem className="w-full flex flex-col">
                     <FormLabel className="font-normal">Năm học</FormLabel>
@@ -94,25 +119,14 @@ export default function addStudentArrange() {
             <div className="w-[500px] inline-flex flex-col justify-start items-start gap-5">
               <FormField
                 control={form.control}
-                name="studentName"
+                name="studentId"
                 render={({ field }) => (
                   <FormItem className="w-full flex flex-col">
-                    <FormLabel className="font-normal">Tên học sinh</FormLabel>
+                    <FormLabel className="font-normal">
+                      Mã số học sinh
+                    </FormLabel>
                     <FormControl>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                        defaultValue={field.value}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Chọn học sinh" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="01">Nguyễn Văn A</SelectItem>
-                          <SelectItem value="02">Trần Thị B</SelectItem>
-                          <SelectItem value="03">Lê Văn C</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <Input placeholder="HS001" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -134,7 +148,7 @@ export default function addStudentArrange() {
               <div className="relative">
                 <Save className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white" />
                 <Button className="pl-12" type="submit">
-                  <Link href="#">Lưu</Link>
+                  Lưu
                 </Button>{" "}
               </div>
             </div>

@@ -9,7 +9,7 @@ export default function page() {
 
   return (
     <div className="relative justify-start text-black text-base font-normal font-['Inter']">
-      Học tập / Lớp học / Xếp lớp / 11A1
+      Học tập / Lớp học / Xếp lớp
       <DataTable
         columns={columns}
         data={StudentArrangeData}
