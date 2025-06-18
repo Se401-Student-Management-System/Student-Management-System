@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { LogOut, Save } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { format } from "date-fns";
 import Link from "next/link";
 import {
   Form,
@@ -25,24 +26,39 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import { Select, SelectItem, SelectTrigger, SelectValue, SelectContent } from "@/components/ui/select";
+} from "@/components/ui/breadcrumb";
+import {
+  Select,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+} from "@/components/ui/select";
 
 const formSchema = z.object({
-    student_id: z.string().min(1, "Mã học sinh không được để trống" ),
-    category_id: z.string().min(1, "Loại vi phạm không được để trống"),
-    date: z.string().min(1, "Ngày vi phạm không được để trống"),
-})
+  studentId: z.string().min(1, "Mã học sinh không được để trống"),
+  className: z.string().min(1, "Tên lớp không được để trống"),
+  supervisorId: z.string().min(1, "Mã giám thị không được để trống"),
+  violationTypeId: z.string().min(1, "Mã vi phạm không được để trống"),
+  academicYear: z.string().optional(),
+  semester: z.string().optional(),
+  violationDate: z.string().optional(),
+});
 
 export default function AddFault() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-        student_id: "",
-        category_id: "",
+      studentId: "",
+      className: "",
+      supervisorId: "",
+      violationTypeId: "",
+      academicYear: "",
+      semester: "",
+      violationDate: format(new Date(), "yyyy-MM-dd"),
     },
   });
 
@@ -51,34 +67,53 @@ export default function AddFault() {
   );
 
   const [categoryId, setCategoryId] = useState<string>("");
-  
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    const res = await fetch("/api/fault", {
-      method: "POST",
-      body: JSON.stringify(values),
-      headers: { "Content-Type": "application/json" },
-    });
+  useEffect(() => {
+    form.setValue("violationDate", format(new Date(), "yyyy-MM-dd"));
+  }, [form]);
 
-    if (res.ok) {
-      toast.success("Thêm vi phạm thành công");
-      router.push("/supervisor/fault");
-    } else {
-      toast.error("Có lỗi xảy ra");
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      const response = await fetch(
+        "http://localhost:8080/violations/record-and-process",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(values),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to add fault");
+      }
+
+      const data = await response.json();
+      console.log("Success:", data);
+
+      // Quay lại trang trước đó
+      router.back();
+    } catch (error) {
+      console.error("Error:", error);
+      // Optional: show notification
     }
   }
-
-  return(
+  return (
     <div>
       <div className="relative justify-start text-black text-base font-normal font-['Inter']">
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/supervisor/fault">Danh mục vi phạm</BreadcrumbLink>
+              <BreadcrumbLink href="/supervisor/fault">
+                Danh mục vi phạm
+              </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink href={`/supervisor/fault/add`}>Thêm vi phạm</BreadcrumbLink>
-            </BreadcrumbItem>   
+              <BreadcrumbLink href={`/supervisor/fault/add`}>
+                Thêm vi phạm
+              </BreadcrumbLink>
+            </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
       </div>
@@ -92,108 +127,114 @@ export default function AddFault() {
           encType="multipart/form-data"
         >
           <div className="grid grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="student_id"
-                render={({ field }) => (
-                  <FormItem className="w-full flex flex-col">
-                    <FormLabel>Mã học sinh</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="text"
-                        placeholder="1" 
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage className="text-red-600 font-semibold" />
-                  </FormItem>
-                )}
-              />
+            <FormField
+              control={form.control}
+              name="studentId"
+              render={({ field }) => (
+                <FormItem className="w-full flex flex-col">
+                  <FormLabel>Mã học sinh</FormLabel>
+                  <FormControl>
+                    <Input type="text" placeholder="1" {...field} />
+                  </FormControl>
+                  <FormMessage className="text-red-600 font-semibold" />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="className"
+              render={({ field }) => (
+                <FormItem className="w-full flex flex-col">
+                  <FormLabel>Tên lớp</FormLabel>
+                  <FormControl>
+                    <Input type="text" placeholder="10A1" {...field} />
+                  </FormControl>
+                  <FormMessage className="text-red-600 font-semibold" />
+                </FormItem>
+              )}
+            />
           </div>
           <div className="grid grid-cols-2 gap-6">
-            <FormItem className="w-full flex flex-col">
-              <FormLabel className="font-normal">Tên học sinh</FormLabel>
-                <Input value="Nguyễn Văn A" readOnly />
-              </FormItem>
-              <FormItem className="w-full flex flex-col">
-                <FormLabel className="font-normal">Lớp</FormLabel>
-                <Input value="11A1" readOnly />
-              </FormItem>
-            </div>
-            <div className="grid grid-cols-2 gap-6">
-              <FormItem className="w-full flex flex-col">
-                <FormLabel className="font-normal">Học kỳ</FormLabel>
-                <Input value="1" readOnly />
-              </FormItem>
-              <FormItem className="w-full flex flex-col">
-                <FormLabel className="font-normal">Năm học</FormLabel>
-                <Input value="2024-2025" readOnly />
-              </FormItem>
+            <FormField
+              control={form.control}
+              name="supervisorId"
+              render={({ field }) => (
+                <FormItem className="w-full flex flex-col">
+                  <FormLabel>Mã giám thị</FormLabel>
+                  <FormControl>
+                    <Input type="text" placeholder="SP001" {...field} />
+                  </FormControl>
+                  <FormMessage className="text-red-600 font-semibold" />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="violationTypeId"
+              render={({ field }) => (
+                <FormItem className="w-full flex flex-col">
+                  <FormLabel>Mã vi phạm</FormLabel>
+                  <FormControl>
+                    <Input type="text" placeholder="1" {...field} />
+                  </FormControl>
+                  <FormMessage className="text-red-600 font-semibold" />
+                </FormItem>
+              )}
+            />
           </div>
-          <div className="w-full self-stretch inline-flex justify-between items-center mt-[10px]">
-            <div className="w-full flex flex-row gap-2">
-              <FormField
-                control={form.control}
-                name="category_id"
-                render={({ field }) => (
-                  <FormItem className="w-full flex flex-col">
-                    <FormLabel className="font-normal">
-                      Lỗi vi phạm
-                    </FormLabel>
-                    <FormControl>
-                      <Select
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          // setCategoryId(value);
-                        }}
-                        value={field.value}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Chọn lỗi vi phạm" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="paid">Đi trễ</SelectItem>
-                          <SelectItem value="paid2">Không mặc đồng phục</SelectItem>
-                          <SelectItem value="paid3">Gây mất trật tự trong lớp</SelectItem>
-                            {/* {providers.length > 0 ? (
-                              providers.map((provider) => (
-                                <SelectItem
-                                  key={provider.id}
-                                  value={provider.id.toString()}
-                                >
-                                  {provider.name}
-                                </SelectItem>
-                              ))
-                            ) : (
-                              <SelectItem value="none" disabled>
-                                Không có lỗi vi phạm nào
-                              </SelectItem>
-                            )} */}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage className="text-red-600 font-semibold"/>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="date"
-                render={({ field }) => (
-                  <FormItem className="w-full flex flex-col">
-                    <FormLabel className="font-normal">Ngày sinh</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="date"
-                        {...field}
-                        value={field.value ?? ""}
-                      />
-                    </FormControl>
-                    <FormMessage className="text-red-600 font-semibold"/>
-                  </FormItem>
-                )}
-              />
-            </div>
+          <div className="grid grid-cols-2 gap-6">
+            <FormField
+              control={form.control}
+              name="academicYear"
+              render={({ field }) => (
+                <FormItem className="w-full flex flex-col">
+                  <FormLabel>Năm học</FormLabel>
+                  <FormControl>
+                    <Input type="text" placeholder="2024-2025" {...field} />
+                  </FormControl>
+                  <FormMessage className="text-red-600 font-semibold" />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="semester"
+              render={({ field }) => (
+                <FormItem className="w-full flex flex-col">
+                  <FormLabel>Học kỳ</FormLabel>
+                  <FormControl>
+                    <Input type="text" placeholder="1" {...field} />
+                  </FormControl>
+                  <FormMessage className="text-red-600 font-semibold" />
+                </FormItem>
+              )}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-6">
+            <FormField
+              control={form.control}
+              name="violationDate"
+              render={({ field }) => (
+                <FormItem className="w-full flex flex-col">
+                  <FormLabel>Ngày vi phạm</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="date"
+                      readOnly
+                      {...field}
+                      value={
+                        form.watch("violationDate") ||
+                        format(new Date(), "yyyy-MM-dd")
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage className="text-red-600 font-semibold" />
+                </FormItem>
+              )}
+            />
           </div>
           <div className="w-full self-stretch inline-flex flex-col justify-start items-end gap-5 mt-[15px]">
             <div className="inline-flex justify-start items-start gap-[29px]">

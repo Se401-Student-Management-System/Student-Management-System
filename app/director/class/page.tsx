@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from "react";
 import { DataTable } from "./components/data-table";
 import { columns } from "./components/columns";
-import { classData } from "./data/class-data";
 
 export default function page() {
   const [classes, setClasses] = useState<any[]>([]);

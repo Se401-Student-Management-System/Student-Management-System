@@ -25,57 +25,74 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+} from "@/components/ui/breadcrumb";
 
 const formSchema = z.object({
-    name: z.string().min(1, "Tên vi phạm không được để trống"),
-    minus_point: z
-      .string()
-      .min(1, "Điểm trừ không được để trống") 
-      .refine((val) => Number(val) > 0, {
+  violationName: z.string().min(1, "Tên vi phạm không được để trống"),
+  deductedPoints: z
+    .string()
+    .min(1, "Điểm trừ không được để trống")
+    .refine((val) => Number(val) > 0, {
       message: "Điểm trừ phải lớn hơn 0",
     }),
-})
+});
 
 export default function AddCategory() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-        name: "",
-        minus_point: "",
+      violationName: "",
+      deductedPoints: "",
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const res = await fetch("/api/category", {
-      method: "POST",
-      body: JSON.stringify(values),
-      headers: { "Content-Type": "application/json" },
-    });
+    try {
+      const response = await fetch(
+        "http://localhost:8080/violation-types/add",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(values),
+        }
+      );
 
-    if (res.ok) {
-      toast.success("Thêm loại vi phạm thành công");
-      router.push("/supervisor/category");
-    } else {
-      toast.error("Có lỗi xảy ra");
+      if (!response.ok) {
+        throw new Error("Failed to add violation type");
+      }
+
+      const data = await response.json();
+      console.log("Success:", data);
+
+      // Quay lại trang trước đó
+      router.back();
+    } catch (error) {
+      console.error("Error:", error);
+      // Optional: show notification
     }
   }
 
-  return(
+  return (
     <div>
       <div className="relative justify-start text-black text-base font-normal font-['Inter']">
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/supervisor/category">Danh mục vi phạm</BreadcrumbLink>
+              <BreadcrumbLink href="/supervisor/category">
+                Danh mục vi phạm
+              </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink href={`/supervisor/category/add`}>Thêm loại vi phạm</BreadcrumbLink>
-            </BreadcrumbItem>   
+              <BreadcrumbLink href={`/supervisor/category/add`}>
+                Thêm loại vi phạm
+              </BreadcrumbLink>
+            </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
       </div>
@@ -91,16 +108,12 @@ export default function AddCategory() {
           <div className="grid grid-cols-2 gap-6">
             <FormField
               control={form.control}
-              name="name"
+              name="violationName"
               render={({ field }) => (
                 <FormItem className="w-full flex flex-col">
                   <FormLabel>Tên vi phạm</FormLabel>
                   <FormControl>
-                    <Input 
-                      type="text"
-                      placeholder="Đi trễ" 
-                      {...field} 
-                    />
+                    <Input type="text" placeholder="Đi trễ" {...field} />
                   </FormControl>
                   <FormMessage className="text-red-600 font-semibold" />
                 </FormItem>
@@ -108,17 +121,12 @@ export default function AddCategory() {
             />
             <FormField
               control={form.control}
-              name="minus_point"
+              name="deductedPoints"
               render={({ field }) => (
                 <FormItem className="w-full flex flex-col">
                   <FormLabel>Điểm trừ</FormLabel>
                   <FormControl>
-                    <Input 
-                      type="number"
-                      min={1}
-                      placeholder="3" 
-                      {...field}
-                    />
+                    <Input type="number" min={1} placeholder="3" {...field} />
                   </FormControl>
                   <FormMessage className="text-red-500 font-semibold" />
                 </FormItem>
