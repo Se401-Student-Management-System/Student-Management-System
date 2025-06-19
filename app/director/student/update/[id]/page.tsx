@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { add, min } from "date-fns";
 import {
   Select,
   SelectContent,
@@ -24,6 +23,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useRouter, useParams } from "next/navigation";
+import { toast } from "sonner";
+import { useEffect } from "react";
 
 const formSchema = z.object({
   username: z.string(),
@@ -33,19 +35,94 @@ const formSchema = z.object({
   phone: z.string().min(10).max(11),
   address: z.string(),
   gender: z.string(),
-  class: z.string(),
   dateOfBirth: z.string(),
   nation: z.string(),
   country: z.string(),
+  status: z.string().optional(),
 });
 
 export default function updateStudent() {
+  const router = useRouter();
+  const params = useParams();
+  const id = params?.id as string;
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      username: "",
+      password: "",
+      studentName: "",
+      email: "",
+      phone: "",
+      address: "",
+      gender: "",
+      dateOfBirth: "",
+      nation: "",
+      country: "",
+      status: "ACTIVTE",
+    },
   });
+  useEffect(() => {
+    async function fetchStudent() {
+      try {
+        const res = await fetch(`http://localhost:8080/students/${id}`);
+        const data = await res.json();
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+        form.reset({
+          username: data.username,
+          password: data.password,
+          studentName: data.fullName,
+          email: data.email,
+          phone: data.phoneNumber,
+          address: data.address,
+          gender: data.gender,
+          dateOfBirth: data.birthDate,
+          nation: data.ethnicity,
+          country: data.birthPlace,
+          status: data.status ?? "ACTIVE",
+        });
+      } catch (error) {
+        toast.error("Không thể lấy thông tin học sinh.");
+      }
+    }
+
+    if (id) {
+      fetchStudent();
+    }
+  }, [id, form]);
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      const response = await fetch(`http://localhost:8080/students/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id,
+          username: values.username,
+          fullName: values.studentName,
+          email: values.email,
+          phoneNumber: values.phone,
+          address: values.address,
+          gender: values.gender,
+          birthDate: values.dateOfBirth,
+          roleName: "student", // hoặc bất kỳ role nào bạn quy định
+          ethnicity: values.nation,
+          birthPlace: values.country,
+          status: values.status ?? "ACTIVE",
+        }),
+      });
+
+      if (response.ok) {
+        toast.success("Cập nhật học sinh thành công!");
+        router.push("/director/student/list");
+      } else {
+        const error = await response.json();
+        toast.error(error.message || "Cập nhật thất bại.");
+      }
+    } catch (error) {
+      toast.error("Lỗi kết nối tới server.");
+    }
   }
 
   return (
@@ -85,7 +162,7 @@ export default function updateStudent() {
                   <FormItem className="w-full flex flex-col">
                     <FormLabel className="font-normal">Mật khẩu</FormLabel>
                     <FormControl>
-                      <Input placeholder="123abc" {...field} />
+                      <Input type="text" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -164,7 +241,7 @@ export default function updateStudent() {
           </div>
           <div className="w-full self-stretch inline-flex justify-between items-center mt-[10px]">
             <div className="w-[500px] inline-flex justify-between items-start gap-2">
-              <div className="w-1/3 flex flex-col">
+              <div className="w-1/2 flex flex-col">
                 <FormField
                   control={form.control}
                   name="gender"
@@ -174,16 +251,14 @@ export default function updateStudent() {
                       <FormControl>
                         <Select
                           onValueChange={field.onChange}
-                          value={field.value}
-                          defaultValue={field.value}
+                          value={field.value ?? ""}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Chọn giới tính" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="male">Nam</SelectItem>
-                            <SelectItem value="female">Nữ</SelectItem>
-                            <SelectItem value="other">Khác</SelectItem>
+                            <SelectItem value="Nam">Nam</SelectItem>
+                            <SelectItem value="Nữ">Nữ</SelectItem>
                           </SelectContent>
                         </Select>
                       </FormControl>
@@ -192,35 +267,7 @@ export default function updateStudent() {
                   )}
                 />
               </div>
-              <div className="w-1/3 flex flex-col">
-                <FormField
-                  control={form.control}
-                  name="class"
-                  render={({ field }) => (
-                    <FormItem className="w-full flex flex-col">
-                      <FormLabel className="font-normal">Lớp học</FormLabel>
-                      <FormControl>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                          defaultValue={field.value}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Chọn lớp học" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="01">11A1</SelectItem>
-                            <SelectItem value="02">11A2</SelectItem>
-                            <SelectItem value="03">11A3</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="w-1/3 flex flex-col">
+              <div className="w-1/2 flex flex-col">
                 <FormField
                   control={form.control}
                   name="dateOfBirth"
@@ -273,6 +320,23 @@ export default function updateStudent() {
               </div>
             </div>
           </div>
+          <div className="w-full self-stretch inline-flex justify-between items-center mt-[10px]">
+            <div className="w-[500px] inline-flex flex-col justify-start items-start gap-5">
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem className="w-full flex flex-col">
+                    <FormLabel className="font-normal">Trạng thái</FormLabel>
+                    <FormControl>
+                      <Input placeholder="0123456789" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
           {/* Button */}
           <div className="w-full self-stretch self-stretch inline-flex flex-col justify-start items-end gap-5 overflow-hidden mt-[15px]">
             <div className="inline-flex justify-start items-start gap-[29px]">
@@ -287,7 +351,7 @@ export default function updateStudent() {
               <div className="relative">
                 <Save className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white" />
                 <Button className="pl-12" type="submit">
-                  <Link href="/student/list">Lưu</Link>
+                  Lưu
                 </Button>{" "}
               </div>
             </div>
