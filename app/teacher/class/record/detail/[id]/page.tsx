@@ -29,30 +29,29 @@ export default function ClassRecordDetailPage() {
           )}&subjectId=${subjectId}&academicYear=${year}&semester=${semesterNum}`
         );
         const studentsList = await res.json();
-
+        const studentsArray = Array.isArray(studentsList) ? studentsList : [];
         const role = localStorage.getItem("role");
 
         const studentsWithScores = await Promise.all(
-          studentsList.map(async (student: any) => {
+          studentsArray.map(async (student: any) => {
             const sid = student.id;
             if (!sid) return null;
             const res = await fetch(
               `http://localhost:8080/grades/${sid}?userId=${teacherId}&role=${role}&semester=${semesterNum}&academicYear=${year}`
             );
             const data = await res.json();
-            // Lọc điểm đúng môn, năm học, học kỳ
-            const scores = Array.isArray(data)
-              ? data.filter(
+            // Lấy đúng điểm môn đang xem
+            const score = Array.isArray(data)
+              ? data.find(
                   (score: any) =>
                     String(score.subjectId) === String(subjectId) &&
                     String(score.academicYear) === String(year) &&
                     Number(score.semester) === semesterNum
                 )
-              : [];
-            if (!scores.length) return null;
+              : null;
             return {
               ...student,
-              scores,
+              score,
             };
           })
         );
@@ -159,19 +158,13 @@ export default function ClassRecordDetailPage() {
                 </thead>
                 <tbody>
                   {uniqueStudents.map((s, sIdx) => {
-                    const score =
-                      Array.isArray(s.scores) && s.scores.length > 0
-                        ? s.scores.at(-1)
-                        : null;
+                    const score = s.score;
                     if (!score) {
                       return (
                         <tr
                           key={`no-score-${s.id}-${sIdx}`}
                           className="border-t border-gray-200"
                         >
-                          {/* <td className="px-4 py-2 text-sm text-gray-900 border-r border-gray-200">
-                            {s.className || s.clazz?.className || ""}
-                          </td> */}
                           <td className="px-4 py-2 text-sm text-gray-900 border-r border-gray-200">
                             {s.id}
                           </td>
@@ -189,9 +182,6 @@ export default function ClassRecordDetailPage() {
                     }
                     return (
                       <tr key={`${s.id}`} className="border-t border-gray-200">
-                        {/* <td className="px-4 py-2 text-sm text-gray-900 border-r border-gray-200">
-                          {s.className || s.clazz?.className || ""}
-                        </td> */}
                         <td className="px-4 py-2 text-sm text-gray-900 border-r border-gray-200">
                           {s.id}
                         </td>

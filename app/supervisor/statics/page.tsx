@@ -54,7 +54,7 @@ const PageFaultList = dynamic(() => Promise.resolve(PageFaultListContent), {
   ssr: false,
   loading: () => (
     <div className="relative justify-start text-black text-base font-normal font-['Inter']">
-      <div className="py-8 text-center text-gray-500">Đang tải...</div>
+      <div className="py-8 text-center text-gray-500">Đang tải dữ liệu thống kê...</div>
     </div>
   ),
 });
