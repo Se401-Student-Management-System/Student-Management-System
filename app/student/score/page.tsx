@@ -22,7 +22,7 @@ function calcAverage(scores: ScoreEntry[]) {
   return avg.toFixed(2);
 }
 
-export default function StudentScorePage() {
+export default function StudentScorePage({ params }: { params: { id: string } }) {
   const [year, setYear] = useState(yearList[0]);
   const [semester, setSemester] = useState(semesterList[0]);
   const [scores, setScores] = useState<ScoreEntry[]>([]);
@@ -37,10 +37,17 @@ export default function StudentScorePage() {
       const r = localStorage.getItem("role");
       setUserId(uid);
       setRole(r);
+      let sid = "";
       if (r === "Student") {
-        setStudentId(uid);
+        sid = uid || "";
+        setStudentId(sid);
       } else {
-        setStudentId(localStorage.getItem("studentId"));
+        sid = localStorage.getItem("studentId") || "";
+        setStudentId(sid);
+      }
+      // Lưu studentId vào sessionStorage
+      if (sid) {
+        sessionStorage.setItem("studentId", sid);
       }
     }
   }, []);

@@ -24,9 +24,17 @@ interface CashierLayoutProps {
   children: ReactNode;
 }
 
-export default function CashierLayout ({ children }: CashierLayoutProps) {
+export default function CashierLayout ({
+  children,
+  params,
+}: {
+  children: React.ReactNode;
+  params: { id: string };
+}) {
     const [isLoading, setIsLoading] = useState(false);
     const [userName, setUserName] = useState<string>("");
+    const[studentId, setStudentId] = useState<string>("");
+    const storedStudentId = typeof window !== "undefined" ? localStorage.getItem("student   id") : null;
     const router = useRouter();
     const handleLogout = async () => {};
     return (
@@ -59,8 +67,21 @@ export default function CashierLayout ({ children }: CashierLayoutProps) {
                         >
                             Đổi mật khẩu
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => router.push("/student/profile")}>
-                            Profile
+                        <DropdownMenuItem
+                          onClick={() => {
+                            // Lấy studentId từ sessionStorage (ưu tiên sessionStorage, fallback localStorage)
+                            const sid =
+                              typeof window !== "undefined"
+                                ? sessionStorage.getItem("studentId") || localStorage.getItem("studentId")
+                                : "";
+                            if (sid) {
+                              router.push(`/student/profile/${sid}`);
+                            } else {
+                              router.push("/student/profile");
+                            }
+                          }}
+                        >
+                          Profile
                         </DropdownMenuItem>{" "}
                         <DropdownMenuItem onClick={handleLogout} disabled={isLoading}>
                             Đăng xuất
