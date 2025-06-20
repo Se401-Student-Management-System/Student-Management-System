@@ -43,6 +43,18 @@ export default function addStudent() {
   const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      username: "",
+      password: "",
+      studentName: "",
+      email: "",
+      phone: "",
+      address: "",
+      gender: "",
+      dateOfBirth: "",
+      nation: "",
+      country: "",
+    },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
