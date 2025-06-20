@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { DataTable } from "./components/data-table";
 import { columns, Fault } from "./components/column";
 import dynamic from "next/dynamic";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 function PageFaultListContent() {
   const [data, setData] = useState<Fault[]>([]);
@@ -44,13 +45,13 @@ function PageFaultListContent() {
         setIsLoading(false);
       }
     };
-    console.log(data[0]);
 
     fetchConductReport();
   }, [grade, semester, academicYear]);
 
   return (
     <div className="relative justify-start text-black text-base font-normal font-['Inter']">
+      
       Hạnh kiểm / Quản lý hạnh kiểm / Thông tin vi phạm
       <DataTable
         columns={columns}
@@ -58,7 +59,6 @@ function PageFaultListContent() {
         isLoading={isLoading}
         error={error}
       />
-      
     </div>
   );
 }
